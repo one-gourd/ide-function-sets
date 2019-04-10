@@ -1,10 +1,18 @@
 import * as React from 'react';
 import { render } from 'react-dom';
-import { FunctionSets, FunctionSetsFactory, IFunctionSetsProps } from '../src/';
 import { Collapse } from 'antd';
+import { FunctionSets, FunctionSetsFactory, IFunctionSetsProps } from '../src/';
+import ReplTests from './repl.test';
+
+// 单元测试
+ReplTests.init();
+
 const Panel = Collapse.Panel;
 
-const { ComponentWithStore: FunctionSetsWithStore, client } = FunctionSetsFactory();
+const {
+  ComponentWithStore: FunctionSetsWithStore,
+  client
+} = FunctionSetsFactory();
 
 function onClick(value) {
   console.log('当前点击：', value);

@@ -10,6 +10,7 @@ const confirm = Modal.confirm;
 // TODO: 全屏功能
 // TODO: 右侧滑动展出功能
 // TODO: 透明遮罩功能
+// TODO: 函数编辑，可以支持自定义组件功能
 
 /**
  * 函数操作类型

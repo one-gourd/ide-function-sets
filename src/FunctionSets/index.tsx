@@ -166,7 +166,7 @@ export const FunctionSetsCurrying: TComponentCurrying<
         </Col>
       </Row>
 
-      {/* <OperationPanel type={EOperationType.ADD} /> */}
+      <OperationPanel type={EOperationType.ADD} />
       <Button onClick={onClickButton}>{text || '点我试试'}</Button>
       <HeaderBar {...headerBar} />
     </StyledContainer>
