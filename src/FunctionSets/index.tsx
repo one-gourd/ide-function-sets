@@ -29,6 +29,11 @@ export interface IFunctionSetsTheme extends IBaseTheme {
   main: string;
 }
 
+export interface IFunctionListItem {
+  name: string;
+  body: string;
+}
+
 export interface IFunctionSetsProps
   extends IFunctionSetsEvent,
     ISubProps,
@@ -42,6 +47,11 @@ export interface IFunctionSetsProps
    * 文案
    */
   text?: string;
+
+  /**
+   * 函数对象映射表
+   */
+  fnList?: IFunctionListItem[];
 }
 
 export const DEFAULT_PROPS: IFunctionSetsProps = {
@@ -60,14 +70,15 @@ export const DEFAULT_PROPS: IFunctionSetsProps = {
   },
   styles: {
     container: {}
-  }
+  },
+  fnList: []
 };
 
 export const FunctionSetsCurrying: TComponentCurrying<
   IFunctionSetsProps,
   ISubProps
 > = subComponents => props => {
-  const { headerBar, visible, text, styles, onClick } = props;
+  const { headerBar, visible, text, styles, onClick, fnList } = props;
 
   const { HeaderBar } = subComponents as Record<
     string,
@@ -80,17 +91,6 @@ export const FunctionSetsCurrying: TComponentCurrying<
     },
     [onClick]
   );
-  const listCard = [
-    {
-      title: 'ttt',
-      content:
-        'const a = 2;\nconst a = 2\nconst a = 2\nconst a = 2\nconst a = 2\nconst a = 2'
-    },
-    {
-      title: '222',
-      content: 'function aa(){return <div></div>}'
-    }
-  ];
 
   // TODO: 添加排序图标 & 交互
   const sortContent = (
@@ -119,19 +119,20 @@ export const FunctionSetsCurrying: TComponentCurrying<
     >
       <Row>
         <Col>
-          {listCard.map((card, kIndex) => {
+          {fnList.map((fn, kIndex) => {
             return (
               <Card
                 bodyStyle={{
                   height: 200
                 }}
                 key={kIndex}
-                title={card.title}
+                title={fn.name}
                 extra={<a href="#">More</a>}
               >
                 <CodeEditor
                   height={100}
-                  value={card.content}
+                  width={'100%'}
+                  value={fn.body}
                   options={{
                     readOnly: true,
                     minimap: {

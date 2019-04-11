@@ -2,11 +2,19 @@ import * as React from 'react';
 import { render } from 'react-dom';
 import { Collapse } from 'antd';
 import { FunctionSets, FunctionSetsFactory, IFunctionSetsProps } from '../src/';
-import ReplTests from './repl.test';
+import { REPL } from '../src/lib/repl';
+import { converterFnJSON } from '../src/FunctionSets/model/func';
+import ReplTests, { eventFns } from './repl.test';
 
 // 单元测试
 ReplTests.init();
 
+// 解析 eventFns
+const repl = new REPL(eventFns); // 对代码进行分析
+const fnJSON = repl.extractAllFunction(); // 获取所有的函数对象
+
+const fnsSnapshoot = converterFnJSON(fnJSON, 'fnBody');
+// console.log(666, fnsSnapshoot);
 const Panel = Collapse.Panel;
 
 const {
@@ -30,7 +38,18 @@ function onClickWithStore(value) {
 }
 
 const props: IFunctionSetsProps = {
-  visible: true
+  visible: true,
+  fnList: [
+    {
+      name: 'ttt',
+      body:
+        'const a = 2;\nconst a = 2\nconst a = 2\nconst a = 2\nconst a = 2\nconst a = 2'
+    },
+    {
+      name: '222',
+      body: 'function aa(){return <div></div>}'
+    }
+  ]
 };
 
 render(
@@ -48,6 +67,7 @@ render(
 client.post('/model', {
   model: {
     visible: true,
-    text: `text${Math.random()}`.slice(0, 8)
+    text: `text${Math.random()}`.slice(0, 8),
+    fns: fnsSnapshoot
   }
 });

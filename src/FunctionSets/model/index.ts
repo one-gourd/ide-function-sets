@@ -1,8 +1,9 @@
 import { types, cast, IAnyModelType } from 'mobx-state-tree';
 
-import { invariant } from 'ide-lib-utils';
+import { invariant, pick } from 'ide-lib-utils';
 
 import { IFuncModelSnapshot, IFuncModel } from './func';
+import { IFunctionListItem } from '../index';
 
 export * from './func';
 
@@ -15,7 +16,7 @@ export function modelExtends(model: IAnyModelType) {
         get allFunctionsToString() {
           let str = '';
 
-          self.fns.values().map((value: IFuncModel) => {
+          Array.from(self.fns.values()).map((value: IFuncModel) => {
             str += value.definition + '\n';
           });
 
@@ -26,20 +27,38 @@ export function modelExtends(model: IAnyModelType) {
         // 方便查阅函数集合
         get fnJSON() {
           const result: { [key: string]: string } = {};
-          self.fns.values().map((value: IFuncModel) => {
+          Array.from(self.fns.values()).map((value: IFuncModel) => {
             result[value.name] = value.body;
           });
           return result;
         },
 
-        // 获取函数名列表，用于函数名非重名校验
-        // TODO: 接受排序参数
-        get fnNameList() {
+        // 获取函数 id 列表
+        get fnIdList() {
           const result: string[] = [];
-          self.fns.values().map((value: IFuncModel) => {
-            result.push(value.name);
+          Array.from(self.fns.values()).map((value: IFuncModel) => {
+            result.push(value.id);
           });
           return result;
+        }
+      };
+    })
+    .views(self => {
+      return {
+        // 获取函数名列表，用于函数名非重名校验
+        // TODO: 接受排序参数
+        get fnNameList(): string[] {
+          return self.fnIdList.map((id: string) => {
+            return self.fns.get(id).name;
+          });
+        },
+
+        // 生成函数对象 list: [{name: 'hello', body: 'world'}]
+        // 用于展示页面列表
+        get fnList(): IFunctionListItem[] {
+          return self.fnIdList.map((id: string) => {
+            return pick(self.fns.get(id), ['name', 'body']);
+          });
         }
       };
     })

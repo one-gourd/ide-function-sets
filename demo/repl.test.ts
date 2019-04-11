@@ -4,7 +4,7 @@ import * as chai from 'chai';
 const expect = chai.expect;
 // 因为依赖 babel cdn url，在 jest 中无法配置，所以挪到浏览器中判断
 // 请到 https://astexplorer.net/ 进行验证
-const eventFns = `;(function() {
+export const eventFns = `;(function() {
     
       const { noop } = window.util;
   

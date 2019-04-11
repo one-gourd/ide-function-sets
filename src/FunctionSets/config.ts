@@ -69,10 +69,10 @@ export const configFunctionSets: IModuleConfig<
       ),
 
       // 排序的顺序，升级还是降序
-      sortOrder: types.optional(types.enumeration<ESortOrder>(
-        'SortOrder',
-        Object.values(ESortOrder)
-      ), ESortOrder.NULL),
+      sortOrder: types.optional(
+        types.enumeration<ESortOrder>('SortOrder', Object.values(ESortOrder)),
+        ESortOrder.NULL
+      ),
 
       // 函数映射表
       fns: types.map(FuncModel)
@@ -88,8 +88,8 @@ export const configFunctionSets: IModuleConfig<
 };
 
 // 枚举受 store 控制的 key，一般来自 config.model.props 中 key
-// 当然也可以自己枚举
-export const SELF_CONTROLLED_KEYS = Object.keys(configFunctionSets.model.props); // ['visible', 'text']
+// 当然也可以自己枚举，比如这里的 fnList 就是计算值
+export const SELF_CONTROLLED_KEYS = ['visible', 'text', 'fnList']; // ['visible', 'text']
 
 export const CONTROLLED_KEYS = BASE_CONTROLLED_KEYS.concat(
   SELF_CONTROLLED_KEYS
