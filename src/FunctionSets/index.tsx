@@ -5,7 +5,7 @@ import { TComponentCurrying } from 'ide-lib-engine';
 
 import { CodeEditor } from 'ide-code-editor';
 
-import { StyledContainer } from './styles';
+import { StyledContainer, StyledCardWrap } from './styles';
 import { ISubProps } from './subs';
 
 import { OperationPanel, EOperationType } from './mods/OperationPanel';
@@ -69,7 +69,10 @@ export const DEFAULT_PROPS: IFunctionSetsProps = {
     ]
   },
   styles: {
-    container: {}
+    container: {
+      height: 800,
+      width: 1060
+    }
   },
   fnList: []
 };
@@ -117,33 +120,38 @@ export const FunctionSetsCurrying: TComponentCurrying<
       // ref={this.root}
       className="ide-function-sets-container"
     >
-      <Row>
-        <Col>
-          {fnList.map((fn, kIndex) => {
-            return (
-              <Card
-                bodyStyle={{
-                  height: 200
-                }}
-                key={kIndex}
-                title={fn.name}
-                extra={<a href="#">More</a>}
-              >
-                <CodeEditor
-                  height={100}
-                  width={'100%'}
-                  value={fn.body}
-                  options={{
-                    readOnly: true,
-                    minimap: {
-                      enabled: false
-                    }
+      <Row className="function-sets-row">
+          <StyledCardWrap
+            style={{ height: `calc(${styles.container.height}px - 60px)` }}
+            className="cards-wrap"
+          >
+            {fnList.map((fn, kIndex) => {
+              return (
+                <Card
+                  bodyStyle={{
+                    height: 150,
+                    padding: 0
                   }}
-                />
-              </Card>
-            );
-          })}
-        </Col>
+                  className="hvr-overline-from-center"
+                  key={fn.name}
+                  title={fn.name}
+                  extra={<a href="#">More</a>}
+                >
+                  <CodeEditor
+                    height={150}
+                    width={'100%'}
+                    value={fn.body}
+                    options={{
+                      readOnly: true,
+                      minimap: {
+                        enabled: false
+                      }
+                    }}
+                  />
+                </Card>
+              );
+            })}
+          </StyledCardWrap>
       </Row>
 
       <Row style={{ marginTop: '10px' }} type="flex" justify="space-between">
@@ -167,9 +175,13 @@ export const FunctionSetsCurrying: TComponentCurrying<
         </Col>
       </Row>
 
-      <OperationPanel type={EOperationType.ADD} />
-      <Button onClick={onClickButton}>{text || '点我试试'}</Button>
-      <HeaderBar {...headerBar} />
+      <OperationPanel
+        width={styles.container.width as number - 100}
+        height={styles.container.height as number}
+        type={EOperationType.ADD}
+      />
+      {/* <Button onClick={onClickButton}>{text || '点我试试'}</Button>
+      <HeaderBar {...headerBar} /> */}
     </StyledContainer>
   );
 };

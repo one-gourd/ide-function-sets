@@ -14,6 +14,9 @@ const colorMap: Record<EOperationType, string> = {
 export const StyledPanelWrap = styled.div<IStyledProps>`
   border: 2px solid ${(props: IStyledProps) => colorMap[props.type]};
   background-color: white;
+  position: absolute;
+  top: 0;
+  right: 0;
   width: 100%;
   height: 100%;
 `;

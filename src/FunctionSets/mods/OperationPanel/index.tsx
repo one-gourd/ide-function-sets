@@ -38,6 +38,16 @@ export interface IOperationPanelProps {
   maxHeight?: number;
 
   /**
+   * 容器高度
+   */
+  height?: number;
+
+  /**
+   * 容器宽度
+   */
+  width?: number;
+
+  /**
    * 当前函数操作面板的类型
    */
   type: EOperationType;
@@ -94,7 +104,7 @@ export const OperationPanel: React.FunctionComponent<
   IOperationPanelProps
 > = observer(props => {
   const mergedProps = Object.assign({}, defaultProps, props);
-  const { name, type, onSubmit } = mergedProps;
+  const { name, type, onSubmit, height, width } = mergedProps;
 
   const inputValueRef = useRef(name);
 
@@ -120,7 +130,7 @@ export const OperationPanel: React.FunctionComponent<
   }, []);
 
   return (
-    <StyledPanelWrap type={type}>
+    <StyledPanelWrap style={{ width: width, height: height }} type={type}>
       <StyledPanelHeader type={type}>
         <span>{titleTextMap[type]}</span>
       </StyledPanelHeader>
@@ -148,7 +158,7 @@ export const OperationPanel: React.FunctionComponent<
         </Row>
         <Row style={{ marginBottom: 20 }}>
           <Col span={24}>
-            <CodeEditor height={400} width={'100%'} value={''} />
+            <CodeEditor height={height! - 160} width={'100%'} value={''} />
           </Col>
         </Row>
 
