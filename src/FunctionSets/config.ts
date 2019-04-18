@@ -4,7 +4,7 @@ import { BASE_CONTROLLED_KEYS } from 'ide-lib-base-component';
 import { IStoresModel, IModuleConfig } from 'ide-lib-engine';
 
 import { DEFAULT_PROPS, IFunctionSetsProps } from '.';
-import { showConsole } from './solution';
+import { handleFnOperation } from './solution';
 import { FuncModel, modelExtends } from './model';
 import { subComponents, ISubProps } from './subs';
 
@@ -36,7 +36,7 @@ export const configFunctionSets: IModuleConfig<
   component: {
     className: 'FunctionSets',
     solution: {
-      onClick: [showConsole]
+      onFnListChange: [handleFnOperation]
     },
     defaultProps: DEFAULT_PROPS,
     children: subComponents

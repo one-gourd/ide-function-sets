@@ -7,9 +7,11 @@ import {
 } from 'mobx-state-tree';
 
 import { quickInitModel } from 'ide-lib-engine';
-
 import { invariant } from 'ide-lib-utils';
+
+import { IFunctionListItem } from '../index';
 import { uuid } from '../../lib/util';
+import { debugModel } from '../../lib/debug';
 
 const FN_IDPREFIX = 'fn_';
 /**
@@ -45,7 +47,7 @@ export interface IFuncModelSnapshot
   extends SnapshotOrInstance<typeof FuncModel> {}
 
 /**
- * 辅助函数，将 fnObject（ {name: body} 对象） 转换成 fns 快照格式，方便丢给 mst 生成对象
+ * 辅助函数，将 fnObjects（ {name: body} 对象集） 转换成 fns 快照格式，方便丢给 mst 生成对象；多用于初始化
  * 如果 body 为空，说明该函数被注释了（或者其他异常情况），则需要剔除该函数方法
  *
  * @param {{[key: string]: string}} fnJSON - 函数 {name: body} 对象
@@ -69,8 +71,25 @@ export function converterFnJSON(
           name: name,
           body: !!subKey ? fnBody[subKey] : fnBody
         };
+      } else {
+        debugModel(
+          `[converterFnJSON] 函数 ${name} 无法转换成模型: body 内容为空，故而忽略`
+        );
       }
     }
   }
   return result;
+}
+
+/**
+ * 将普通 IFunctionListItem 实例转换成 fn 扩展实例
+ * @param fn - 普通函数对象
+ */
+export function converterFnSnapshot(fn: IFunctionListItem) {
+  const fid = uuid(FN_IDPREFIX);
+  return {
+    id: fid,
+    name: fn.name,
+    body: fn.body
+  };
 }

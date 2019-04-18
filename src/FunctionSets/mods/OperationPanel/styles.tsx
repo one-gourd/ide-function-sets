@@ -13,6 +13,9 @@ const colorMap: Record<EOperationType, string> = {
 
 export const StyledPanelWrap = styled.div<IStyledProps>`
   border: 2px solid ${(props: IStyledProps) => colorMap[props.type]};
+  transform: translate(${(props: IStyledProps) =>
+    props.visible ? '0' : '100%'}, 0);
+  transition: transform .5s ease-out;
   background-color: white;
   position: absolute;
   top: 0;

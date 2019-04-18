@@ -37,6 +37,11 @@ function onClickWithStore(value) {
   });
 }
 
+// 当函数有更改的时候
+function onFnListChange(type, fnItem) {
+  console.log(`list change, type: ${type}`);
+}
+
 const props: IFunctionSetsProps = {
   visible: true,
   fnList: [
@@ -58,7 +63,10 @@ render(
       <FunctionSets {...props} onClick={onClick} />
     </Panel>
     <Panel header="包含 store 功能" key="1">
-      <FunctionSetsWithStore onClick={onClickWithStore} />
+      <FunctionSetsWithStore
+        onClick={onClickWithStore}
+        onFnListChange={onFnListChange}
+      />
     </Panel>
   </Collapse>,
   document.getElementById('example') as HTMLElement

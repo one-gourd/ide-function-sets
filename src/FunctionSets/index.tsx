@@ -1,16 +1,25 @@
-import React, { useCallback } from 'react';
-import { Button, Row, Col, Input, Card, Icon, Popover } from 'antd';
-import { IBaseTheme, IBaseComponentProps } from 'ide-lib-base-component';
+import React, { useCallback, useRef, useReducer, useEffect } from 'react';
+import { Button, Row, Col, Input, Card, Icon, Popover, message } from 'antd';
+import {
+  IBaseTheme,
+  IBaseComponentProps,
+  withClickOutside,
+  useSizeArea
+} from 'ide-lib-base-component';
 import { TComponentCurrying } from 'ide-lib-engine';
 
 import { CodeEditor } from 'ide-code-editor';
 
 import { StyledContainer, StyledCardWrap } from './styles';
 import { ISubProps } from './subs';
+import { debugMini } from '../lib/debug';
 
 import { OperationPanel, EOperationType } from './mods/OperationPanel';
+import { constants } from 'fs';
 
 const Search = Input.Search;
+
+const OperationPanelWithClickOutside = withClickOutside(OperationPanel);
 
 // TODO: 可以查看所有函数的编辑器（readonly）
 
@@ -19,11 +28,12 @@ export interface IFunctionSetsEvent {
    * 点击回调函数
    */
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
-}
 
-// export interface IFunctionSetsStyles extends IBaseStyles {
-//   container?: React.CSSProperties;
-// }
+  /**
+   * 当函数列表有更改的时候
+   */
+  onFnListChange?: (type: EOperationType, fnItem: IFunctionListItem, currentFnList: IFunctionListItem[]) => void;
+}
 
 export interface IFunctionSetsTheme extends IBaseTheme {
   main: string;
@@ -52,10 +62,16 @@ export interface IFunctionSetsProps
    * 函数对象映射表
    */
   fnList?: IFunctionListItem[];
+
+  /**
+   * 是否展现函数操作面板
+   */
+  panelVisible?: boolean;
 }
 
 export const DEFAULT_PROPS: IFunctionSetsProps = {
   visible: true,
+  panelVisible: true,
   theme: {
     main: '#ECECEC'
   },
@@ -77,23 +93,113 @@ export const DEFAULT_PROPS: IFunctionSetsProps = {
   fnList: []
 };
 
+interface IReducerState {
+  operationType: EOperationType;
+  panelVisible: boolean;
+  fnList: IFunctionListItem[];
+}
+
+enum EReducerType {
+  // 有关操作面板的
+  OPERATION_PANEL = 'operation_panel'
+
+  // 有关函数列表
+  // FN_LIST = 'fn_list'
+}
+
+const stateReducer = (
+  state: IReducerState,
+  [type, payload]: [EReducerType, Partial<IReducerState>]
+) => {
+  debugMini(`[状态 reduce] type: ${type}, payload: %o`, payload);
+  switch (type) {
+    // 函数操作面板
+    case EReducerType.OPERATION_PANEL:
+      return {
+        ...state,
+        operationType: payload.operationType,
+        panelVisible: payload.panelVisible
+      };
+  }
+
+  return state;
+};
+
 export const FunctionSetsCurrying: TComponentCurrying<
   IFunctionSetsProps,
   ISubProps
 > = subComponents => props => {
-  const { headerBar, visible, text, styles, onClick, fnList } = props;
+  const {
+    headerBar,
+    visible,
+    text,
+    styles,
+    fnList,
+    onFnListChange,
+    panelVisible
+  } = props;
 
   const { HeaderBar } = subComponents as Record<
     string,
     React.FunctionComponent<typeof props>
   >;
 
-  const onClickButton = useCallback(
-    (e: React.MouseEvent<HTMLButtonElement>) => {
-      onClick && onClick(e);
+  const refContainer = useRef(null);
+  const containerArea = useSizeArea(refContainer);
+  const [state, dispatch] = useReducer(stateReducer, {
+    panelVisible: panelVisible,
+    operationType: EOperationType.ADD,
+    fnList: fnList
+  });
+
+  // useEffect(() => {
+  //   // 调整函数更改
+  //   dispatch([EReducerType.FN_LIST, { fnList: fnList }]);
+  // }, [fnList]);
+
+  /* ----------------------------------------------------
+    回调函数部分
+----------------------------------------------------- */
+
+  const onClickPanelOutside = useCallback(
+    (e: MouseEvent, isOutSide: boolean, detail: { [key: string]: boolean }) => {
+      console.log('探测是否点在蒙层外:', isOutSide, detail);
+      dispatch([EReducerType.OPERATION_PANEL, { panelVisible: false }]);
     },
-    [onClick]
+    []
   );
+
+  // "新增函数" 按钮回调
+  const onClickBtnAdd = useCallback(() => {
+    dispatch([
+      EReducerType.OPERATION_PANEL,
+      { operationType: EOperationType.ADD, panelVisible: true }
+    ]);
+  }, []);
+
+  // 操作面板上的 “确定” 按钮
+  const onSubmitPanel = useCallback(
+    (id: string, value: string, type: EOperationType) => {
+
+      // 调整函数更改
+      // dispatch([EReducerType.FN_LIST, { fnList: fnList }]);
+      onFnListChange &&
+        onFnListChange(type, {
+          name: id,
+          body: value
+        }, fnList);
+      // 关闭弹层
+      dispatch([EReducerType.OPERATION_PANEL, { panelVisible: false }]);
+    },
+    [onFnListChange]
+  );
+
+  const onCancelPanel = useCallback((type: EOperationType) => {
+    // 关闭弹层
+    dispatch([EReducerType.OPERATION_PANEL, { panelVisible: false }]);
+  }, []);
+
+  // =================================
 
   // TODO: 添加排序图标 & 交互
   const sortContent = (
@@ -117,41 +223,41 @@ export const FunctionSetsCurrying: TComponentCurrying<
     <StyledContainer
       style={styles.container}
       visible={visible}
-      // ref={this.root}
+      ref={refContainer}
       className="ide-function-sets-container"
     >
       <Row className="function-sets-row">
-          <StyledCardWrap
-            style={{ height: `calc(${styles.container.height}px - 60px)` }}
-            className="cards-wrap"
-          >
-            {fnList.map((fn, kIndex) => {
-              return (
-                <Card
-                  bodyStyle={{
-                    height: 150,
-                    padding: 0
+        <StyledCardWrap
+          style={{ height: `calc(${styles.container.height}px - 60px)` }}
+          className="cards-wrap"
+        >
+          {fnList.map((fn, kIndex) => {
+            return (
+              <Card
+                bodyStyle={{
+                  height: 150,
+                  padding: 0
+                }}
+                className="hvr-overline-from-center"
+                key={fn.name}
+                title={fn.name}
+                extra={<a href="#">More</a>}
+              >
+                <CodeEditor
+                  height={150}
+                  width={'100%'}
+                  value={fn.body}
+                  options={{
+                    readOnly: true,
+                    minimap: {
+                      enabled: false
+                    }
                   }}
-                  className="hvr-overline-from-center"
-                  key={fn.name}
-                  title={fn.name}
-                  extra={<a href="#">More</a>}
-                >
-                  <CodeEditor
-                    height={150}
-                    width={'100%'}
-                    value={fn.body}
-                    options={{
-                      readOnly: true,
-                      minimap: {
-                        enabled: false
-                      }
-                    }}
-                  />
-                </Card>
-              );
-            })}
-          </StyledCardWrap>
+                />
+              </Card>
+            );
+          })}
+        </StyledCardWrap>
       </Row>
 
       <Row style={{ marginTop: '10px' }} type="flex" justify="space-between">
@@ -170,15 +276,27 @@ export const FunctionSetsCurrying: TComponentCurrying<
           >
             <Button icon="bars">排序</Button>
           </Popover>
-          <Button icon="plus-square-o">新增</Button>
+          <Button onClick={onClickBtnAdd} icon="plus-square-o">
+            新增
+          </Button>
           <Button icon="eye-o">查看所有</Button>
         </Col>
       </Row>
 
-      <OperationPanel
-        width={styles.container.width as number - 100}
-        height={styles.container.height as number}
-        type={EOperationType.ADD}
+      <OperationPanelWithClickOutside
+        onClick={onClickPanelOutside}
+        visible={state.panelVisible}
+        autoHide={false}
+        layerArea={containerArea}
+        bgColor={'rgba(0,0,0, 0.2)'}
+        contentProps={{
+          width: (styles.container.width as number) - 100,
+          height: styles.container.height,
+          type: state.operationType,
+          visible: state.panelVisible,
+          onSubmit: onSubmitPanel,
+          onCancel: onCancelPanel
+        }}
       />
       {/* <Button onClick={onClickButton}>{text || '点我试试'}</Button>
       <HeaderBar {...headerBar} /> */}

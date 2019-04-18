@@ -1,9 +1,11 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { Button, message, Row, Col, Input, Icon, Modal } from 'antd';
 import { observer } from 'mobx-react-lite';
 import { CodeEditor } from 'ide-code-editor';
 
 import { StyledPanelWrap, StyledPanelHeader, StyledPanelBody } from './styles';
+
+import { isValidFunctionName } from '../../../lib/util';
 
 const confirm = Modal.confirm;
 
@@ -63,9 +65,19 @@ export interface IOperationPanelProps {
   value?: string;
 
   /**
+   * 是否可见
+   */
+  visible: boolean;
+
+  /**
    * 点击确认提交（保存/删除）按钮时的回调
    */
   onSubmit?: (id: string, value: string, type: EOperationType) => void;
+
+  /**
+   * 点击取消按钮时的回调
+   */
+  onCancel?: (type: EOperationType) => void;
 }
 
 export const defaultProps: Partial<IOperationPanelProps> = {
@@ -104,33 +116,62 @@ export const OperationPanel: React.FunctionComponent<
   IOperationPanelProps
 > = observer(props => {
   const mergedProps = Object.assign({}, defaultProps, props);
-  const { name, type, onSubmit, height, width } = mergedProps;
+  const {
+    name,
+    value,
+    type,
+    height,
+    width,
+    visible,
+    onSubmit,
+    onCancel
+  } = mergedProps;
 
-  const inputValueRef = useRef(name);
+  const inputNameRef = useRef(name);
+  const codeBodyRef = useRef(value);
 
   const onClickSubmit = useCallback(() => {
-    if (!inputValueRef.current) {
+    if (!inputNameRef.current) {
       message.error('函数名不能为空');
+      return;
+    }
+
+    // 判断函数名是否有效
+    if (!isValidFunctionName(inputNameRef.current)) {
+      message.error(`函数名 ${inputNameRef.current} 不合法，请检查`);
       return;
     }
 
     // 如果是删除操作，进行二次确认
     if (type === EOperationType.DEL) {
-      showDeleteConfirm(name, () => {
-        onSubmit && onSubmit(name, inputValueRef.current, type);
+      showDeleteConfirm(inputNameRef.current, () => {
+        onSubmit && onSubmit(inputNameRef.current, codeBodyRef.current, type);
         return;
       });
     } else {
-      onSubmit && onSubmit(name, inputValueRef.current, type);
+      onSubmit && onSubmit(inputNameRef.current, codeBodyRef.current, type);
     }
   }, [type, onSubmit]);
 
+  const onClickCancel = useCallback(() => {
+    onCancel && onCancel(type);
+  }, [type, onCancel]);
+
   const onInputBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
-    inputValueRef.current = e.target.value;
+    inputNameRef.current = e.target.value;
+  }, []);
+
+  const onCodeChange = useCallback((value: string) => {
+    codeBodyRef.current = value;
   }, []);
 
   return (
-    <StyledPanelWrap style={{ width: width, height: height }} type={type}>
+    <StyledPanelWrap
+      className="operation-panel-wrap"
+      visible={visible}
+      style={{ width: width, height: height }}
+      type={type}
+    >
       <StyledPanelHeader type={type}>
         <span>{titleTextMap[type]}</span>
       </StyledPanelHeader>
@@ -158,7 +199,15 @@ export const OperationPanel: React.FunctionComponent<
         </Row>
         <Row style={{ marginBottom: 20 }}>
           <Col span={24}>
-            <CodeEditor height={height! - 160} width={'100%'} value={''} />
+            <CodeEditor
+              options={{
+                readOnly: type === EOperationType.DEL
+              }}
+              height={height! - 160}
+              width={'100%'}
+              value={value}
+              onChange={onCodeChange}
+            />
           </Col>
         </Row>
 
@@ -173,7 +222,9 @@ export const OperationPanel: React.FunctionComponent<
             </Button>
           )}
 
-          <Button style={{ marginLeft: 10 }}>取消</Button>
+          <Button onClick={onClickCancel} style={{ marginLeft: 10 }}>
+            取消
+          </Button>
         </Row>
       </StyledPanelBody>
     </StyledPanelWrap>

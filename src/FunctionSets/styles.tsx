@@ -13,6 +13,7 @@ export const StyledContainer = styled.div.attrs({
   display: ${(props: IStyledProps) => (props.visible ? 'block' : 'none')};
   border-radius: 5px;
   background: ${(props: IStyledProps) => props.theme.main};
+  overflow: hidden;
   width: 100%;
   padding: 10px;
 `;
