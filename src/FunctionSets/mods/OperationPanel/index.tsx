@@ -1,11 +1,12 @@
-import React, { useCallback, useRef, useState } from 'react';
-import { Button, message, Row, Col, Input, Icon, Modal } from 'antd';
+import React, { useCallback, useRef, useState, useEffect } from 'react';
+import { Button, message, Row, Col, Input, Icon, Modal, Popover } from 'antd';
 import { observer } from 'mobx-react-lite';
 import { CodeEditor } from 'ide-code-editor';
 
 import { StyledPanelWrap, StyledPanelHeader, StyledPanelBody } from './styles';
 
 import { isValidFunctionName } from '../../../lib/util';
+import { REPL } from '../../../lib/repl';
 
 const confirm = Modal.confirm;
 
@@ -127,42 +128,72 @@ export const OperationPanel: React.FunctionComponent<
     onCancel
   } = mergedProps;
 
-  const inputNameRef = useRef(name);
   const codeBodyRef = useRef(value);
 
+  const [inputName, setInputName] = useState(name);
+
+  useEffect(() => {
+    setInputName(name);
+    codeBodyRef.current = value;
+    console.log(444, inputName, codeBodyRef.current);
+  }, [value, name, visible]);
+
+  const [errContent, setErrContent] = useState('');
+
   const onClickSubmit = useCallback(() => {
-    if (!inputNameRef.current) {
+    const fnBody = codeBodyRef.current;
+
+    if (!inputName) {
       message.error('函数名不能为空');
       return;
     }
 
     // 判断函数名是否有效
-    if (!isValidFunctionName(inputNameRef.current)) {
-      message.error(`函数名 ${inputNameRef.current} 不合法，请检查`);
+    if (!isValidFunctionName(inputName)) {
+      message.error(`函数名 ${inputName} 不合法，请检查`);
       return;
     }
 
+    // 判断函数是否有错误
+    const validationResult = REPL.validateCode(fnBody);
+    if (!validationResult.isValid) {
+      message.error(`函数 ${inputName} 保存失败`);
+      setErrContent(validationResult.message);
+      return;
+    }
+
+    setErrContent(''); // 置空错误信息
+
     // 如果是删除操作，进行二次确认
     if (type === EOperationType.DEL) {
-      showDeleteConfirm(inputNameRef.current, () => {
-        onSubmit && onSubmit(inputNameRef.current, codeBodyRef.current, type);
+      showDeleteConfirm(inputName, () => {
+        onSubmit && onSubmit(inputName, codeBodyRef.current, type);
         return;
       });
     } else {
-      onSubmit && onSubmit(inputNameRef.current, codeBodyRef.current, type);
+      onSubmit && onSubmit(inputName, codeBodyRef.current, type);
     }
-  }, [type, onSubmit]);
+  }, [inputName, type, onSubmit]);
 
   const onClickCancel = useCallback(() => {
     onCancel && onCancel(type);
   }, [type, onCancel]);
 
-  const onInputBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
-    inputNameRef.current = e.target.value;
-  }, []);
+  const handleInputChange = useCallback(
+    (e: React.FocusEvent<HTMLInputElement>) => {
+      setInputName(e.target.value);
+    },
+    []
+  );
 
   const onCodeChange = useCallback((value: string) => {
     codeBodyRef.current = value;
+  }, []);
+
+  const handleVisibleChange = useCallback(visible => {
+    if (!visible) {
+      setErrContent('');
+    }
   }, []);
 
   return (
@@ -183,8 +214,8 @@ export const OperationPanel: React.FunctionComponent<
               prefix={<Icon type="file-text" style={{ fontSize: 14 }} />}
               placeholder="函数名"
               disabled={type !== EOperationType.ADD}
-              defaultValue={name}
-              onBlur={onInputBlur}
+              onChange={handleInputChange}
+              value={inputName}
             />
           </Col>
           {type === EOperationType.EDIT &&
@@ -205,7 +236,7 @@ export const OperationPanel: React.FunctionComponent<
               }}
               height={height! - 160}
               width={'100%'}
-              value={value}
+              value={codeBodyRef.current}
               onChange={onCodeChange}
             />
           </Col>
@@ -217,9 +248,17 @@ export const OperationPanel: React.FunctionComponent<
               删除
             </Button>
           ) : (
-            <Button type="primary" onClick={onClickSubmit}>
-              保存
-            </Button>
+            <Popover
+              content={<pre dangerouslySetInnerHTML={{ __html: errContent }} />}
+              title="存在语法错误:"
+              trigger="click"
+              visible={!!errContent}
+              onVisibleChange={handleVisibleChange}
+            >
+              <Button type="primary" onClick={onClickSubmit}>
+                保存
+              </Button>
+            </Popover>
           )}
 
           <Button onClick={onClickCancel} style={{ marginLeft: 10 }}>

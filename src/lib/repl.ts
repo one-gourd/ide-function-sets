@@ -1,5 +1,5 @@
 import { debugError } from './debug';
-import { isExist } from 'ide-lib-utils';
+import { isExist, invariant } from 'ide-lib-utils';
 import { parseScript, ParseOptions, Program } from 'esprima';
 // var esprima = require('esprima');
 var estraverse = require('estraverse-fb');
@@ -34,21 +34,38 @@ export class REPL {
 
     // 解析获取语法树
 
-    this.ast = this.code
-      ? parseScript(this.code, this.astConfig)
-      : void 0;
+    this.ast = this.code ? parseScript(this.code, this.astConfig) : void 0;
   }
 
+  // 利用 babel 进行代码转换，比如从 JSX 转换成 JS 代码
+  // 更多方法参考：https://babeljs.io/docs/en/babel-core
   static babelCompile(code: string) {
+    invariant(isExist(Babel), '[babelCompile] Babel 对象不存在');
     try {
-      if (!isExist(Babel)) {
-        debugError('Babel 还没初始化完成，不存在 Babel 对象');
-        return code;
-      }
       return Babel.transform(code, CONFIG_BABEL).code;
     } catch (err) {
       debugError('Babel 编译出错: %o', err);
       return code;
+    }
+  }
+
+  // 检查代码是否合法
+  static validateCode(code: string) {
+    invariant(isExist(Babel), '[validCode] Babel 对象不存在');
+    try {
+      const result = Babel.transform(code, CONFIG_BABEL).code;
+      return {
+        isValid: true,
+        message: '代码合法',
+        code: result
+      };
+    } catch (err) {
+      debugError('Babel 编译出错: %o', err);
+      return {
+        isValid: false,
+        message: err,
+        code: code
+      }
     }
   }
 
@@ -80,12 +97,19 @@ export class REPL {
     this.traverse({
       enter: (node: any, parent: any) => {
         // 获取函数
-        if (node.type == 'MemberExpression' && node.property.value == name) {
-          info.loc = parent.loc;
-          info.range = parent.range;
-          info.content = this.code.slice(info.range[0], info.range[1]);
-          let rightRange = parent.right.range; // 函数体的范围
-          info.fnBody = this.code.slice(rightRange[0], rightRange[1]);
+        try {
+          if (node.type == 'MemberExpression' && node.property.value == name) {
+            // 注意有可能某个函数被另外一个函数使用，这里需要判断右节点是否存在
+            if (parent.right && parent.right.range) {
+              info.loc = parent.loc;
+              info.range = parent.range;
+              info.content = this.code.slice(info.range[0], info.range[1]);
+              let rightRange = parent.right.range; // 函数体的范围
+              info.fnBody = this.code.slice(rightRange[0], rightRange[1]);
+            }
+          }
+        } catch (err) {
+          console.error('[repl] traverse error:, ', err);
         }
       }
     });

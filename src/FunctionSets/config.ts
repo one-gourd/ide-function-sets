@@ -4,6 +4,7 @@ import { BASE_CONTROLLED_KEYS } from 'ide-lib-base-component';
 import { IStoresModel, IModuleConfig } from 'ide-lib-engine';
 
 import { DEFAULT_PROPS, IFunctionSetsProps } from '.';
+import { EOperationType } from './mods/OperationPanel';
 import { handleFnOperation } from './solution';
 import { FuncModel, modelExtends } from './model';
 import { subComponents, ISubProps } from './subs';
@@ -42,7 +43,7 @@ export const configFunctionSets: IModuleConfig<
     children: subComponents
   },
   router: {
-    domain: 'header-block',
+    domain: 'function-sets',
     list: [GetRouter, PostRouter, PutRouter, DelRouter],
     hoistRoutes: {
       alias: 'bar',
@@ -75,7 +76,14 @@ export const configFunctionSets: IModuleConfig<
       ),
 
       // 函数映射表
-      fns: types.map(FuncModel)
+      fns: types.map(FuncModel),
+
+      // 函数面板种类
+      operationType: types.optional(types.string, EOperationType.ADD),
+
+      // 函数操作面板是否可见
+      panelVisible: types.optional(types.boolean, false)
+
       // language: types.optional(
       //   types.enumeration('Type', CODE_LANGUAGES),
       //   ECodeLanguage.JS
@@ -89,7 +97,13 @@ export const configFunctionSets: IModuleConfig<
 
 // 枚举受 store 控制的 key，一般来自 config.model.props 中 key
 // 当然也可以自己枚举，比如这里的 fnList 就是计算值
-export const SELF_CONTROLLED_KEYS = ['visible', 'text', 'fnList']; // ['visible', 'text']
+export const SELF_CONTROLLED_KEYS = [
+  'visible',
+  'text',
+  'fnList',
+  'operationType',
+  'panelVisible'
+]; // ['visible', 'text']
 
 export const CONTROLLED_KEYS = BASE_CONTROLLED_KEYS.concat(
   SELF_CONTROLLED_KEYS

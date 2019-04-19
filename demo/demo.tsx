@@ -77,10 +77,27 @@ render(
   document.getElementById('example') as HTMLElement
 );
 
-client.post('/model', {
-  model: {
-    visible: true,
-    text: `text${Math.random()}`.slice(0, 8),
-    fns: fnsSnapshoot
-  }
-});
+
+client
+  .post('/model', {
+    model: {
+      visible: true,
+      text: `text${Math.random()}`.slice(0, 8),
+      fns: fnsSnapshoot
+    }
+  })
+  .then(res => {
+    // 让面板可见
+    client
+      .put('/model', {
+        name: 'panelVisible',
+        value: true
+      })
+      // .then(res => {
+      //   console.log('666', res);
+
+      //   client.get('/model').then(res => {
+      //     console.log('777', res);
+      //   });
+      // });
+  });
