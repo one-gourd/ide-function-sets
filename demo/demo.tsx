@@ -38,8 +38,13 @@ function onClickWithStore(value) {
 }
 
 // 当函数有更改的时候
-function onFnListChange(type, fnItem) {
+function onFnListChange(type, fnItem, fnLists, actionContext) {
   console.log(`list change, type: ${type}`);
+
+  const { context } = actionContext;
+
+  // 没有报错，才会自动关闭弹层
+  return !context.hasError;
 }
 
 const props: IFunctionSetsProps = {

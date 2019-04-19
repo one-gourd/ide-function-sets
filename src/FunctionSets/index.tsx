@@ -15,7 +15,6 @@ import { ISubProps } from './subs';
 import { debugMini } from '../lib/debug';
 
 import { OperationPanel, EOperationType } from './mods/OperationPanel';
-import { constants } from 'fs';
 
 const Search = Input.Search;
 
@@ -31,8 +30,13 @@ export interface IFunctionSetsEvent {
 
   /**
    * 当函数列表有更改的时候
+   * 如果返回值是 boolean 的话，用来控制弹层是否自动消失
    */
-  onFnListChange?: (type: EOperationType, fnItem: IFunctionListItem, currentFnList: IFunctionListItem[]) => void;
+  onFnListChange?: (
+    type: EOperationType,
+    fnItem: IFunctionListItem,
+    currentFnList: IFunctionListItem[]
+  ) => boolean;
 }
 
 export interface IFunctionSetsTheme extends IBaseTheme {
@@ -180,16 +184,26 @@ export const FunctionSetsCurrying: TComponentCurrying<
   // 操作面板上的 “确定” 按钮
   const onSubmitPanel = useCallback(
     (id: string, value: string, type: EOperationType) => {
-
       // 调整函数更改
       // dispatch([EReducerType.FN_LIST, { fnList: fnList }]);
-      onFnListChange &&
-        onFnListChange(type, {
-          name: id,
-          body: value
-        }, fnList);
-      // 关闭弹层
-      dispatch([EReducerType.OPERATION_PANEL, { panelVisible: false }]);
+      // 默认自动关闭弹层
+      let autoHide = true;
+
+      // 如果存在回调函数，则使用回调函数来控制弹层是否自动关闭
+      if (onFnListChange) {
+        autoHide = onFnListChange(
+          type,
+          {
+            name: id,
+            body: value
+          },
+          fnList
+        );
+      }
+      
+      if (autoHide) {
+        dispatch([EReducerType.OPERATION_PANEL, { panelVisible: false }]);
+      }
     },
     [onFnListChange]
   );
