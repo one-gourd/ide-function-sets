@@ -135,7 +135,6 @@ export const OperationPanel: React.FunctionComponent<
   useEffect(() => {
     setInputName(name);
     codeBodyRef.current = value;
-    console.log(444, inputName, codeBodyRef.current);
   }, [value, name, visible]);
 
   const [errContent, setErrContent] = useState('');

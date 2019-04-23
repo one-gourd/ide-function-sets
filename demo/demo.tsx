@@ -77,7 +77,6 @@ render(
   document.getElementById('example') as HTMLElement
 );
 
-
 client
   .post('/model', {
     model: {
@@ -88,16 +87,15 @@ client
   })
   .then(res => {
     // 让面板可见
-    client
-      .put('/model', {
-        name: 'panelVisible',
-        value: true
-      })
-      // .then(res => {
-      //   console.log('666', res);
-
-      //   client.get('/model').then(res => {
-      //     console.log('777', res);
-      //   });
-      // });
+    // client
+    //   .put('/model', {
+    //     name: 'panelVisible',
+    //     value: true
+    //   })
+    // .then(res => {
+    //   console.log('666', res);
+    //   client.get('/model').then(res => {
+    //     console.log('777', res);
+    //   });
+    // });
   });

@@ -6,7 +6,7 @@ import { IFunctionListItem } from '../../index';
 import { EOperationType } from '../../mods/OperationPanel/';
 
 /**
- * 显示 list 列表项
+ * 当 list 列表项有更改的时候，进行响应
  * @param env - IStoresEnv
  */
 export const handleFnOperation = (
@@ -69,5 +69,24 @@ export const handleFnOperation = (
       break;
     default:
       break;
+  }
+};
+
+/**
+ * 当操作没有问题的时候，自动关闭
+ * @param env - IStoresEnv
+ */
+export const hidePanelWhenNoError = (
+  env: IStoresEnv<IStoresModel>,
+  actionContext: IActionContext
+) => async (
+  type: EOperationType,
+  fnItem: IFunctionListItem,
+  currentFnList: IFunctionListItem[]
+) => {
+  const { stores } = env;
+  const { context } = actionContext;
+  if (context && !context.hasError) {
+    stores.model.setPanelVisible(false);
   }
 };

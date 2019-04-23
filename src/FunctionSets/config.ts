@@ -5,7 +5,14 @@ import { IStoresModel, IModuleConfig } from 'ide-lib-engine';
 
 import { DEFAULT_PROPS, IFunctionSetsProps } from '.';
 import { EOperationType } from './mods/OperationPanel';
-import { handleFnOperation } from './solution';
+import {
+  handleFnOperation,
+  hidePanelWhenNoError,
+  showEditPanel,
+  autoHidePanel,
+  hidePanelWhenCancel,
+  handleButtonAction
+} from './solution';
 import { FuncModel, modelExtends } from './model';
 import { subComponents, ISubProps } from './subs';
 
@@ -37,7 +44,11 @@ export const configFunctionSets: IModuleConfig<
   component: {
     className: 'FunctionSets',
     solution: {
-      onFnListChange: [handleFnOperation]
+      onFnListChange: [handleFnOperation, hidePanelWhenNoError],
+      onDbFnCard: [showEditPanel],
+      onClickPanel: [autoHidePanel],
+      onCancelPanel: [hidePanelWhenCancel],
+      onButtonAction: [handleButtonAction]
     },
     defaultProps: DEFAULT_PROPS,
     children: subComponents
@@ -78,6 +89,9 @@ export const configFunctionSets: IModuleConfig<
       // 函数映射表
       fns: types.map(FuncModel),
 
+      // 当前编辑的函数名
+      fnName: types.optional(types.string, ''),
+
       // 函数面板种类
       operationType: types.optional(types.string, EOperationType.ADD),
 
@@ -101,6 +115,7 @@ export const SELF_CONTROLLED_KEYS = [
   'visible',
   'text',
   'fnList',
+  'fnName',
   'operationType',
   'panelVisible'
 ]; // ['visible', 'text']

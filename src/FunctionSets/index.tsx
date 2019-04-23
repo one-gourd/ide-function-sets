@@ -12,7 +12,7 @@ import { CodeEditor } from 'ide-code-editor';
 
 import { StyledContainer, StyledCardWrap } from './styles';
 import { ISubProps } from './subs';
-import { debugMini } from '../lib/debug';
+import { debugMini, debugInteract } from '../lib/debug';
 
 import { OperationPanel, EOperationType } from './mods/OperationPanel';
 
@@ -41,6 +41,30 @@ export interface IFunctionSetsEvent {
     fnItem: IFunctionListItem,
     currentFnList: IFunctionListItem[]
   ) => boolean;
+
+  /**
+   * 双击卡片的功能
+   */
+  onDbFnCard?: (fn: IFunctionListItem, fIndex: number) => void;
+
+  /**
+   * 点击 Panel 蒙层时的回调，用于探测是否点击在蒙层外
+   */
+  onClickPanel?: (
+    e: MouseEvent,
+    isOutSide: boolean,
+    detail: { [key: string]: boolean }
+  ) => void;
+
+  /**
+   * 点击 Panel 上 “取消” 按钮的回调
+   */
+  onCancelPanel?: (type: EOperationType) => void;
+
+  /**
+   * 处理界面上不同操作按钮
+   */
+  onButtonAction?: (type: EOperationType) => void;
 }
 
 export interface IFunctionSetsTheme extends IBaseTheme {
@@ -66,7 +90,6 @@ export interface IFunctionSetsProps
    */
   text?: string;
 
-
   /**
    * 当前被选中的函数名
    */
@@ -86,7 +109,6 @@ export interface IFunctionSetsProps
    * 是否展现函数操作面板
    */
   operationType?: EOperationType;
-
 }
 
 export const DEFAULT_PROPS: IFunctionSetsProps = {
@@ -114,34 +136,31 @@ export const DEFAULT_PROPS: IFunctionSetsProps = {
   fnList: []
 };
 
-interface IReducerState {
-  operationType: EOperationType;
-  panelVisible: boolean;
-  fnList: IFunctionListItem[];
-  fnName: string; // 要更改的函数名
-}
+// interface IReducerState {
+//   fnName: string; // 要更改的函数名
+// }
 
-enum EReducerType {
-  // 有关操作面板的
-  OPERATION_PANEL = 'operation_panel'
-}
+// enum EReducerType {
+//   // 有关操作面板的
+//   OPERATION_PANEL = 'operation_panel'
+// }
 
-const stateReducer = (
-  state: IReducerState,
-  [type, payload]: [EReducerType, Partial<IReducerState>]
-) => {
-  debugMini(`[状态 reduce] type: ${type}, payload: %o`, payload);
-  switch (type) {
-    // 函数操作面板
-    case EReducerType.OPERATION_PANEL:
-      return {
-        ...state,
-        ...payload
-      };
-  }
+// const stateReducer = (
+//   state: IReducerState,
+//   [type, payload]: [EReducerType, Partial<IReducerState>]
+// ) => {
+//   debugMini(`[状态 reduce] type: ${type}, payload: %o`, payload);
+//   switch (type) {
+//     // 函数操作面板
+//     case EReducerType.OPERATION_PANEL:
+//       return {
+//         ...state,
+//         ...payload
+//       };
+//   }
 
-  return state;
-};
+//   return state;
+// };
 
 /**
  * 根据函数名获取函数体
@@ -170,9 +189,13 @@ export const FunctionSetsCurrying: TComponentCurrying<
     styles,
     fnList,
     operationType,
-    onFnListChange,
     fnName,
-    panelVisible
+    panelVisible,
+    onFnListChange,
+    onDbFnCard,
+    onClickPanel,
+    onCancelPanel,
+    onButtonAction
   } = props;
 
   const { HeaderBar } = subComponents as Record<
@@ -182,62 +205,41 @@ export const FunctionSetsCurrying: TComponentCurrying<
 
   const refContainer = useRef(null);
   const containerArea = useSizeArea(refContainer);
-  const [state, dispatch] = useReducer(stateReducer, {
-    panelVisible: panelVisible,
-    operationType: operationType,
-    fnList: fnList,
-    fnName: fnName
-  });
+  // const [state, dispatch] = useReducer(stateReducer, {
+  //   fnName: fnName
+  // });
 
-  // 响应 props 属性的变更
-  useEffect(() => {
-    dispatch([EReducerType.OPERATION_PANEL, { panelVisible }]);
-  }, [panelVisible]);
 
-  useEffect(() => {
-    dispatch([EReducerType.OPERATION_PANEL, { operationType }]);
-  }, [operationType]);
-
-  useEffect(() => {
-    dispatch([EReducerType.OPERATION_PANEL, { fnName }]);
-  }, [fnName]);
-
+  // useEffect(() => {
+  //   dispatch([EReducerType.OPERATION_PANEL, { fnName }]);
+  // }, [fnName]);
 
   /* ----------------------------------------------------
     回调函数部分
 ----------------------------------------------------- */
 
-  const onClickPanelOutside = useCallback(
+  const CbClickPanelOutside = useCallback(
     (e: MouseEvent, isOutSide: boolean, detail: { [key: string]: boolean }) => {
-      console.log('探测是否点在蒙层外:', isOutSide, detail);
-      dispatch([EReducerType.OPERATION_PANEL, { panelVisible: false }]);
+      debugInteract('探测是否点在蒙层外:', isOutSide, detail);
+      onClickPanel && onClickPanel(e, isOutSide, detail);
     },
     []
   );
 
   // "新增函数" 按钮回调
-  const onClickBtnAdd = useCallback(() => {
-    dispatch([
-      EReducerType.OPERATION_PANEL,
-      {
-        operationType: EOperationType.ADD,
-        panelVisible: true,
-        fnName: ''
-      }
-    ]);
-  }, []);
+  const onClickBtn = useCallback(
+    (type: EOperationType) => () => {
+      onButtonAction && onButtonAction(type);
+    },
+    [onButtonAction]
+  );
 
   // 操作面板上的 “确定” 按钮
   const onSubmitPanel = useCallback(
     (id: string, value: string, type: EOperationType) => {
-      // 调整函数更改
-      // dispatch([EReducerType.FN_LIST, { fnList: fnList }]);
-      // 默认自动关闭弹层
-      let autoHide = true;
-
       // 如果存在回调函数，则使用回调函数来控制弹层是否自动关闭
       if (onFnListChange) {
-        autoHide = onFnListChange(
+        onFnListChange(
           type,
           {
             name: id,
@@ -246,18 +248,24 @@ export const FunctionSetsCurrying: TComponentCurrying<
           fnList
         );
       }
-
-      if (autoHide) {
-        dispatch([EReducerType.OPERATION_PANEL, { panelVisible: false }]);
-      }
     },
     [onFnListChange]
   );
 
-  const onCancelPanel = useCallback((type: EOperationType) => {
-    // 关闭弹层
-    dispatch([EReducerType.OPERATION_PANEL, { panelVisible: false }]);
-  }, []);
+  // const onCancelPanel = useCallback(
+  //   (type: EOperationType) => {
+  //     onCancelPanel && onCancelPanel(type);
+  //   },
+  //   [onCancelPanel]
+  // );
+
+  // 双击函数卡片，弹出编辑框
+  const onDbCard = useCallback(
+    (fn: IFunctionListItem, fIndex: number) => () => {
+      onDbFnCard && onDbFnCard(fn, fIndex);
+    },
+    [onDbFnCard]
+  );
 
   // =================================
 
@@ -281,7 +289,11 @@ export const FunctionSetsCurrying: TComponentCurrying<
 
   // 根据操作类型 & 函数名获取初始化的函数 body
   const fnBody =
-    operationType === EOperationType.ADD ? TPL_FN : getFnBodyByName(state.fnName, fnList);
+    operationType === EOperationType.ADD
+      ? TPL_FN
+      : getFnBodyByName(fnName, fnList);
+
+  // console.log(444, state);
 
   return (
     <StyledContainer
@@ -295,13 +307,14 @@ export const FunctionSetsCurrying: TComponentCurrying<
           style={{ height: `calc(${styles.container.height}px - 60px)` }}
           className="cards-wrap"
         >
-          {fnList.map((fn, kIndex) => {
+          {fnList.map((fn, fIndex) => {
             return (
               <Card
                 bodyStyle={{
                   height: 150,
                   padding: 0
                 }}
+                onDoubleClick={onDbCard(fn, fIndex)}
                 className="hvr-overline-from-center"
                 key={fn.name}
                 title={fn.name}
@@ -340,7 +353,7 @@ export const FunctionSetsCurrying: TComponentCurrying<
           >
             <Button icon="bars">排序</Button>
           </Popover>
-          <Button onClick={onClickBtnAdd} icon="plus-square-o">
+          <Button onClick={onClickBtn(EOperationType.ADD)} icon="plus-square-o">
             新增
           </Button>
           <Button icon="eye-o">查看所有</Button>
@@ -348,17 +361,16 @@ export const FunctionSetsCurrying: TComponentCurrying<
       </Row>
 
       <OperationPanelWithClickOutside
-        onClick={onClickPanelOutside}
-        visible={state.panelVisible}
-        autoHide={false}
+        onClick={CbClickPanelOutside}
+        visible={panelVisible}
         layerArea={containerArea}
         bgColor={'rgba(0,0,0, 0.2)'}
         contentProps={{
           width: (styles.container.width as number) - 100,
           height: styles.container.height,
-          type: state.operationType,
-          visible: state.panelVisible,
-          name: state.fnName,
+          type: operationType,
+          visible: panelVisible,
+          name: fnName,
           value: fnBody,
           onSubmit: onSubmitPanel,
           onCancel: onCancelPanel
