@@ -3,3 +3,4 @@ export * from './model/onDbFnCard';
 export * from './model/onClickPanel';
 export * from './model/onCancelPanel';
 export * from './model/onButtonAction';
+export * from './model/onSearchChange';

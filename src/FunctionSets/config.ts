@@ -11,7 +11,8 @@ import {
   showEditPanel,
   autoHidePanel,
   hidePanelWhenCancel,
-  handleButtonAction
+  handleButtonAction,
+  searchFnItem
 } from './solution';
 import { FuncModel, modelExtends } from './model';
 import { subComponents, ISubProps } from './subs';
@@ -44,6 +45,7 @@ export const configFunctionSets: IModuleConfig<
   component: {
     className: 'FunctionSets',
     solution: {
+      onSearchChange: [searchFnItem],
       onFnListChange: [handleFnOperation, hidePanelWhenNoError],
       onDbFnCard: [showEditPanel],
       onClickPanel: [autoHidePanel],
@@ -91,6 +93,9 @@ export const configFunctionSets: IModuleConfig<
 
       // 当前编辑的函数名
       fnName: types.optional(types.string, ''),
+
+      // 设置函数名过滤
+      filterKey: types.optional(types.string, ''),
 
       // 当前编辑的函数内容
       codeContent: types.optional(types.string, ''),

@@ -10,3 +10,8 @@ const REG_FN_NAME = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|eval|nul
 export function isValidFunctionName(name: string) {
   return REG_FN_NAME.test(name);
 }
+
+// https://stackoverflow.com/questions/3561493/is-there-a-regexp-escape-function-in-javascript
+export function escapeRegex(s: string) {
+  return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+}

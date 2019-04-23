@@ -5,6 +5,7 @@ import { invariant, pick } from 'ide-lib-utils';
 import { IFuncModelSnapshot, IFuncModel, converterFnSnapshot } from './func';
 import { IFunctionListItem } from '../index';
 import { debugModel } from '../../lib/debug';
+import { escapeRegex } from '../../lib/util';
 
 export * from './func';
 
@@ -34,11 +35,16 @@ export function modelExtends(model: IAnyModelType) {
           return result;
         },
 
-        // 获取函数 id 列表
+        // 获取函数 id 列表，支持 filterKey 过滤；
+        // TODO: 高级过滤，模糊匹配
         get fnIdList() {
           const result: string[] = [];
+          const regKey = new RegExp(escapeRegex(self.filterKey), 'g');
           Array.from(self.fns.values()).map((value: IFuncModel) => {
-            result.push(value.id);
+            // 不存在过滤字段，或者满足过滤字段
+            if (!self.filterKey || regKey.test(value.name)) {
+              result.push(value.id);
+            }
           });
           return result;
         }
@@ -55,7 +61,7 @@ export function modelExtends(model: IAnyModelType) {
         },
 
         // 生成函数对象 list: [{name: 'hello', body: 'world'}]
-        // 用于展示页面列表
+        // 用于展示页面列表，支持 filterKey 进行列表过滤
         get fnList(): IFunctionListItem[] {
           return self.fnIdList.map((id: string) => {
             return pick(self.fns.get(id), ['name', 'body']);

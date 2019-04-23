@@ -61,6 +61,11 @@ export interface IFunctionSetsEvent {
    * 处理界面上不同操作按钮
    */
   onButtonAction?: (type: EOperationType) => void;
+
+  /**
+   * 函数搜索功能
+   */
+  onSearchChange?: (e: React.FocusEvent<HTMLInputElement>) => void;
 }
 
 export interface IFunctionSetsTheme extends IBaseTheme {
@@ -155,7 +160,8 @@ export const FunctionSetsCurrying: TComponentCurrying<
     onDbFnCard,
     onClickPanel,
     onCancelPanel,
-    onButtonAction
+    onButtonAction,
+    onSearchChange
   } = props;
 
   const { HeaderBar } = subComponents as Record<
@@ -277,9 +283,9 @@ export const FunctionSetsCurrying: TComponentCurrying<
       <Row style={{ marginTop: '10px' }} type="flex" justify="space-between">
         <Col span={14}>
           <Search
-            placeholder="输入函数名"
+            placeholder="通过函数名过滤"
             style={{ width: '100%' }}
-            onSearch={value => console.log(value)}
+            onChange={onSearchChange}
           />
         </Col>
         <Col span={8}>
