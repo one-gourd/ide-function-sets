@@ -20,10 +20,6 @@ const Search = Input.Search;
 
 const OperationPanelWithClickOutside = withClickOutside(OperationPanel);
 
-const TPL_FN = `function handler(ev){
-
-}`;
-
 // TODO: 可以查看所有函数的编辑器（readonly）
 
 export interface IFunctionSetsEvent {
@@ -96,6 +92,11 @@ export interface IFunctionSetsProps
   fnName?: string;
 
   /**
+   * 展现在面板里的函数内容
+   */
+  codeContent?: string;
+
+  /**
    * 函数对象映射表
    */
   fnList?: IFunctionListItem[];
@@ -136,48 +137,6 @@ export const DEFAULT_PROPS: IFunctionSetsProps = {
   fnList: []
 };
 
-// interface IReducerState {
-//   fnName: string; // 要更改的函数名
-// }
-
-// enum EReducerType {
-//   // 有关操作面板的
-//   OPERATION_PANEL = 'operation_panel'
-// }
-
-// const stateReducer = (
-//   state: IReducerState,
-//   [type, payload]: [EReducerType, Partial<IReducerState>]
-// ) => {
-//   debugMini(`[状态 reduce] type: ${type}, payload: %o`, payload);
-//   switch (type) {
-//     // 函数操作面板
-//     case EReducerType.OPERATION_PANEL:
-//       return {
-//         ...state,
-//         ...payload
-//       };
-//   }
-
-//   return state;
-// };
-
-/**
- * 根据函数名获取函数体
- */
-function getFnBodyByName(fnName: string, fnList: IFunctionListItem[]) {
-  let targetBody = '';
-  [].concat(fnList || []).some((fnItem: IFunctionListItem) => {
-    if (fnItem.name === fnName) {
-      targetBody = fnItem.body;
-      return true;
-    }
-    return false;
-  });
-
-  return targetBody;
-}
-
 export const FunctionSetsCurrying: TComponentCurrying<
   IFunctionSetsProps,
   ISubProps
@@ -190,6 +149,7 @@ export const FunctionSetsCurrying: TComponentCurrying<
     fnList,
     operationType,
     fnName,
+    codeContent,
     panelVisible,
     onFnListChange,
     onDbFnCard,
@@ -205,14 +165,6 @@ export const FunctionSetsCurrying: TComponentCurrying<
 
   const refContainer = useRef(null);
   const containerArea = useSizeArea(refContainer);
-  // const [state, dispatch] = useReducer(stateReducer, {
-  //   fnName: fnName
-  // });
-
-
-  // useEffect(() => {
-  //   dispatch([EReducerType.OPERATION_PANEL, { fnName }]);
-  // }, [fnName]);
 
   /* ----------------------------------------------------
     回调函数部分
@@ -252,13 +204,6 @@ export const FunctionSetsCurrying: TComponentCurrying<
     [onFnListChange]
   );
 
-  // const onCancelPanel = useCallback(
-  //   (type: EOperationType) => {
-  //     onCancelPanel && onCancelPanel(type);
-  //   },
-  //   [onCancelPanel]
-  // );
-
   // 双击函数卡片，弹出编辑框
   const onDbCard = useCallback(
     (fn: IFunctionListItem, fIndex: number) => () => {
@@ -286,15 +231,7 @@ export const FunctionSetsCurrying: TComponentCurrying<
       </p>
     </div>
   );
-
-  // 根据操作类型 & 函数名获取初始化的函数 body
-  const fnBody =
-    operationType === EOperationType.ADD
-      ? TPL_FN
-      : getFnBodyByName(fnName, fnList);
-
-  // console.log(444, state);
-
+  // console.log(4555, codeContent);
   return (
     <StyledContainer
       style={styles.container}
@@ -356,7 +293,9 @@ export const FunctionSetsCurrying: TComponentCurrying<
           <Button onClick={onClickBtn(EOperationType.ADD)} icon="plus-square-o">
             新增
           </Button>
-          <Button icon="eye-o">查看所有</Button>
+          <Button onClick={onClickBtn(EOperationType.VIEWALL)} icon="eye-o">
+            查看所有
+          </Button>
         </Col>
       </Row>
 
@@ -371,7 +310,7 @@ export const FunctionSetsCurrying: TComponentCurrying<
           type: operationType,
           visible: panelVisible,
           name: fnName,
-          value: fnBody,
+          value: codeContent,
           onSubmit: onSubmitPanel,
           onCancel: onCancelPanel
         }}

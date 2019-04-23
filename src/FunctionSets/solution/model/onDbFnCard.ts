@@ -17,5 +17,6 @@ export const showEditPanel = (env: IStoresEnv<IStoresModel>) => async (
   //   切换成编辑
   stores.model.setOperationType(EOperationType.EDIT);
   stores.model.setFnName(fn.name);
+  stores.model.setCodeContent(fn.body);
   stores.model.setPanelVisible(true);
 };

@@ -8,14 +8,17 @@ interface IStyledProps extends IOperationPanelProps, IBaseStyledProps {}
 const colorMap: Record<EOperationType, string> = {
   ADD: '#00a854',
   DEL: '#f04134',
-  EDIT: '#108ee9'
+  EDIT: '#108ee9',
+  VIEWALL: '#5a5a5a'
 };
 
 export const StyledPanelWrap = styled.div<IStyledProps>`
   border: 2px solid ${(props: IStyledProps) => colorMap[props.type]};
-  transform: translate(${(props: IStyledProps) =>
-    props.visible ? '0' : '100%'}, 0);
-  transition: transform .5s ease-out;
+  transform: translate(
+    ${(props: IStyledProps) => (props.visible ? '0' : '100%')},
+    0
+  );
+  transition: transform 0.5s ease-out;
   background-color: white;
   position: absolute;
   top: 0;

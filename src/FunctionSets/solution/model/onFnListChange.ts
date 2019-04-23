@@ -3,7 +3,7 @@ import { IStoresEnv, IActionContext } from 'ide-lib-base-component';
 import { IStoresModel } from 'ide-lib-engine';
 
 import { IFunctionListItem } from '../../index';
-import { EOperationType } from '../../mods/OperationPanel/';
+import { EOperationType } from '../../mods/OperationPanel/index';
 
 /**
  * 当 list 列表项有更改的时候，进行响应
@@ -53,6 +53,7 @@ export const handleFnOperation = (
         return;
       }
       //  存在的情况下去更新
+      // console.log(333, fnItem);
       stores.model.upsertFnItem(fnItem);
 
       break;

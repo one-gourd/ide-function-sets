@@ -2,6 +2,7 @@ import React, { useCallback, useRef, useState, useEffect } from 'react';
 import { Button, message, Row, Col, Input, Icon, Modal, Popover } from 'antd';
 import { observer } from 'mobx-react-lite';
 import { CodeEditor } from 'ide-code-editor';
+import { TAnyFunction } from 'ide-lib-base-component';
 
 import { StyledPanelWrap, StyledPanelHeader, StyledPanelBody } from './styles';
 
@@ -21,7 +22,8 @@ const confirm = Modal.confirm;
 export enum EOperationType {
   ADD = 'ADD', // 新增
   DEL = 'DEL', // 删除
-  EDIT = 'EDIT' // 编辑
+  EDIT = 'EDIT', // 编辑
+  VIEWALL = 'VIEWALL' // 查看所有
 }
 
 export interface IOperationPanelProps {
@@ -110,7 +112,62 @@ function showDeleteConfirm(name: string, onDelete: () => void) {
 const titleTextMap: Record<EOperationType, string> = {
   ADD: '新增函数',
   EDIT: '编辑函数',
-  DEL: '删除函数'
+  DEL: '删除函数',
+  VIEWALL: '查看所有函数'
+};
+
+// 渲染底部操作区域
+const renderFooter = function(
+  type: EOperationType,
+  errContent: string,
+  onClickSubmit: TAnyFunction,
+  onClickCancel: TAnyFunction,
+  handleVisibleChange: TAnyFunction
+) {
+  switch (type) {
+    case EOperationType.DEL:
+      return (
+        <>
+          <Button type="danger" onClick={onClickSubmit}>
+            删除
+          </Button>
+          <Button onClick={onClickCancel} style={{ marginLeft: 10 }}>
+            取消
+          </Button>
+        </>
+      );
+
+    case EOperationType.ADD:
+    case EOperationType.EDIT:
+      return (
+        <>
+          <Popover
+            content={<pre dangerouslySetInnerHTML={{ __html: errContent }} />}
+            title="存在语法错误:"
+            trigger="click"
+            visible={!!errContent}
+            onVisibleChange={handleVisibleChange}
+          >
+            <Button type="primary" onClick={onClickSubmit}>
+              保存
+            </Button>
+          </Popover>
+          <Button onClick={onClickCancel} style={{ marginLeft: 10 }}>
+            取消
+          </Button>
+        </>
+      );
+    case EOperationType.VIEWALL:
+      return (
+        <>
+          <Button onClick={onClickCancel} style={{ marginLeft: 10 }}>
+            取消
+          </Button>
+        </>
+      );
+    default:
+      return null;
+  }
 };
 
 export const OperationPanel: React.FunctionComponent<
@@ -128,51 +185,55 @@ export const OperationPanel: React.FunctionComponent<
     onCancel
   } = mergedProps;
 
-  const codeBodyRef = useRef(value);
+  // const codeBodyRef = useRef(value);
 
   const [inputName, setInputName] = useState(name);
+  const [codeBody, setCodeBody] = useState(value);
 
   useEffect(() => {
     setInputName(name);
-    codeBodyRef.current = value;
+    setCodeBody(value);
   }, [value, name, visible]);
 
   const [errContent, setErrContent] = useState('');
 
-  const onClickSubmit = useCallback(() => {
-    const fnBody = codeBodyRef.current;
+  const onClickSubmit = useCallback(
+    (type: EOperationType, onSubmit: TAnyFunction, inputName: string, codeBody: string) => () => {
+      // const fnBody = codeBodyRef.current;
 
-    if (!inputName) {
-      message.error('函数名不能为空');
-      return;
-    }
-
-    // 判断函数名是否有效
-    if (!isValidFunctionName(inputName)) {
-      message.error(`函数名 ${inputName} 不合法，请检查`);
-      return;
-    }
-
-    // 判断函数是否有错误
-    const validationResult = REPL.validateCode(fnBody);
-    if (!validationResult.isValid) {
-      message.error(`函数 ${inputName} 保存失败`);
-      setErrContent(validationResult.message);
-      return;
-    }
-
-    setErrContent(''); // 置空错误信息
-
-    // 如果是删除操作，进行二次确认
-    if (type === EOperationType.DEL) {
-      showDeleteConfirm(inputName, () => {
-        onSubmit && onSubmit(inputName, codeBodyRef.current, type);
+      if (!inputName) {
+        message.error('函数名不能为空');
         return;
-      });
-    } else {
-      onSubmit && onSubmit(inputName, codeBodyRef.current, type);
-    }
-  }, [inputName, type, onSubmit]);
+      }
+
+      // 判断函数名是否有效
+      if (!isValidFunctionName(inputName)) {
+        message.error(`函数名 ${inputName} 不合法，请检查`);
+        return;
+      }
+
+      // 判断函数是否有错误
+      const validationResult = REPL.validateCode(codeBody);
+      if (!validationResult.isValid) {
+        message.error(`函数 ${inputName} 保存失败`);
+        setErrContent(validationResult.message);
+        return;
+      }
+
+      setErrContent(''); // 置空错误信息
+
+      // 如果是删除操作，进行二次确认
+      if (type === EOperationType.DEL) {
+        showDeleteConfirm(inputName, () => {
+          onSubmit && onSubmit(inputName, codeBody, type);
+          return;
+        });
+      } else {
+        onSubmit && onSubmit(inputName, codeBody, type);
+      }
+    },
+    []
+  );
 
   const onClickCancel = useCallback(() => {
     onCancel && onCancel(type);
@@ -185,8 +246,10 @@ export const OperationPanel: React.FunctionComponent<
     []
   );
 
+  // 编辑器内容变更的时候
   const onCodeChange = useCallback((value: string) => {
-    codeBodyRef.current = value;
+    setCodeBody(value);
+    // codeBodyRef.current = value;
   }, []);
 
   const handleVisibleChange = useCallback(visible => {
@@ -207,62 +270,52 @@ export const OperationPanel: React.FunctionComponent<
       </StyledPanelHeader>
 
       <StyledPanelBody>
-        <Row type="flex" align="middle" style={{ marginBottom: 10 }}>
-          <Col span={8}>
-            <Input
-              prefix={<Icon type="file-text" style={{ fontSize: 14 }} />}
-              placeholder="函数名"
-              disabled={type !== EOperationType.ADD}
-              onChange={handleInputChange}
-              value={inputName}
-            />
-          </Col>
-          {type === EOperationType.EDIT &&
-            ((
-              <Col span={8} style={{ marginLeft: 14 }}>
-                <Button type="primary" size="small">
-                  编辑
-                </Button>
-              </Col>
-            ) ||
-              null)}
-        </Row>
+        {type !== EOperationType.VIEWALL ? (
+          <Row type="flex" align="middle" style={{ marginBottom: 10 }}>
+            <Col span={8}>
+              <Input
+                prefix={<Icon type="file-text" style={{ fontSize: 14 }} />}
+                placeholder="函数名"
+                disabled={type !== EOperationType.ADD}
+                onChange={handleInputChange}
+                value={inputName}
+              />
+            </Col>
+            {type === EOperationType.EDIT &&
+              ((
+                <Col span={8} style={{ marginLeft: 14 }}>
+                  <Button type="primary" size="small">
+                    编辑
+                  </Button>
+                </Col>
+              ) ||
+                null)}
+          </Row>
+        ) : null}
+
         <Row style={{ marginBottom: 20 }}>
           <Col span={24}>
             <CodeEditor
               options={{
-                readOnly: type === EOperationType.DEL
+                readOnly:
+                  type === EOperationType.DEL || type === EOperationType.VIEWALL
               }}
               height={height! - 160}
               width={'100%'}
-              value={codeBodyRef.current}
+              value={codeBody}
               onChange={onCodeChange}
             />
           </Col>
         </Row>
 
         <Row type="flex" align="middle" justify="center">
-          {type === EOperationType.DEL ? (
-            <Button type="danger" onClick={onClickSubmit}>
-              删除
-            </Button>
-          ) : (
-            <Popover
-              content={<pre dangerouslySetInnerHTML={{ __html: errContent }} />}
-              title="存在语法错误:"
-              trigger="click"
-              visible={!!errContent}
-              onVisibleChange={handleVisibleChange}
-            >
-              <Button type="primary" onClick={onClickSubmit}>
-                保存
-              </Button>
-            </Popover>
+          {renderFooter(
+            type,
+            errContent,
+            onClickSubmit(type, onSubmit, inputName, codeBody),
+            onClickCancel,
+            handleVisibleChange
           )}
-
-          <Button onClick={onClickCancel} style={{ marginLeft: 10 }}>
-            取消
-          </Button>
         </Row>
       </StyledPanelBody>
     </StyledPanelWrap>

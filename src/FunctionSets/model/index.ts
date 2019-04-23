@@ -18,7 +18,7 @@ export function modelExtends(model: IAnyModelType) {
           let str = '';
 
           Array.from(self.fns.values()).map((value: IFuncModel) => {
-            str += value.definition + '\n';
+            str += value.definition + '\n\n';
           });
 
           return str;

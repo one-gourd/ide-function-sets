@@ -92,6 +92,9 @@ export const configFunctionSets: IModuleConfig<
       // 当前编辑的函数名
       fnName: types.optional(types.string, ''),
 
+      // 当前编辑的函数内容
+      codeContent: types.optional(types.string, ''),
+
       // 函数面板种类
       operationType: types.optional(types.string, EOperationType.ADD),
 
@@ -116,6 +119,7 @@ export const SELF_CONTROLLED_KEYS = [
   'text',
   'fnList',
   'fnName',
+  'codeContent',
   'operationType',
   'panelVisible'
 ]; // ['visible', 'text']
