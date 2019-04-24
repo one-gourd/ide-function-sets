@@ -19,7 +19,7 @@ import { StyledPanelWrap, StyledPanelHeader, StyledPanelBody } from './styles';
 import { isValidFunctionName } from '../../../lib/util';
 import { REPL } from '../../../lib/repl';
 
-const confirm = Modal.confirm;
+// const confirm = Modal.confirm;
 
 // TODO: 全屏功能
 // TODO: 函数编辑，可以支持自定义组件功能
@@ -96,23 +96,23 @@ export const defaultProps: Partial<IOperationPanelProps> = {
   value: ''
 };
 
-/**
- * 确认删除函数的二次弹层
- *
- * @param {string} name - 函数名
- */
-function showDeleteConfirm(name: string, onDelete: () => void) {
-  confirm({
-    title: '确认删除函数?',
-    content: `确认删除函数 "${name}" 么？该操作不可恢复，请谨慎操作`,
-    okText: '确认删除',
-    okType: 'danger',
-    cancelText: '我在想想',
-    onOk() {
-      onDelete && onDelete;
-    }
-  });
-}
+// /**
+//  * 确认删除函数的二次弹层
+//  *
+//  * @param {string} name - 函数名
+//  */
+// function showDeleteConfirm(name: string, onDelete: () => void) {
+//   confirm({
+//     title: '确认删除函数?',
+//     content: `确认删除函数 "${name}" 么？该操作不可恢复，请谨慎操作`,
+//     okText: '确认删除',
+//     okType: 'danger',
+//     cancelText: '我在想想',
+//     onOk() {
+//       onDelete && onDelete;
+//     }
+//   });
+// }
 
 /**
  * 标题文案映射

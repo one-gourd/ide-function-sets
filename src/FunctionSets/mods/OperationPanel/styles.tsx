@@ -18,7 +18,7 @@ export const StyledPanelWrap = styled.div<IStyledProps>`
     ${(props: IStyledProps) => (props.visible ? '0' : '100%')},
     0
   );
-  transition: transform 0.5s ease-out;
+  transition: transform 0.4s ease-out;
   background-color: white;
   position: absolute;
   top: 0;

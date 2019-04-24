@@ -1,6 +1,13 @@
-import React, { useCallback, useRef, useReducer, useEffect } from 'react';
+import React, {
+  useCallback,
+  useRef,
+  useReducer,
+  useEffect,
+  useState
+} from 'react';
 import {
   Button,
+  Modal,
   Row,
   Col,
   Input,
@@ -24,6 +31,7 @@ import { CodeEditor } from 'ide-code-editor';
 import { StyledContainer, StyledCardWrap } from './styles';
 import { ISubProps } from './subs';
 import { debugMini, debugInteract } from '../lib/debug';
+import { isValidFunctionName } from '../lib/util';
 
 import { OperationPanel, EOperationType } from './mods/OperationPanel';
 
@@ -81,7 +89,11 @@ export interface IFunctionSetsEvent {
   /**
    * 函数卡片的操作
    */
-  onCardAction?: (type: ECardActionType, fnItem: IFunctionListItem) => void;
+  onCardAction?: (
+    type: ECardActionType,
+    fnItem: IFunctionListItem,
+    newName?: string
+  ) => void;
 }
 
 export interface IFunctionSetsTheme extends IBaseTheme {
@@ -144,6 +156,34 @@ export const DEFAULT_PROPS: IFunctionSetsProps = {
   fnList: []
 };
 
+interface IReducerState {
+  modalVisible: boolean;
+  currentFnItem: IFunctionListItem;
+  newName: string;
+}
+
+enum EReducerType {
+  // 重命名操作
+  RENAME = 'rename'
+}
+
+const stateReducer = (
+  state: IReducerState,
+  [type, payload]: [EReducerType, Partial<IReducerState>]
+) => {
+  debugMini(`[状态 reduce] type: ${type}, payload: %o`, payload);
+  switch (type) {
+    // 函数操作面板
+    case EReducerType.RENAME:
+      return {
+        ...state,
+        ...payload
+      };
+  }
+
+  return state;
+};
+
 // 枚举值：函数 card 操作类型
 export enum ECardActionType {
   RENAME = 'rename', // 重命名
@@ -151,6 +191,7 @@ export enum ECardActionType {
 }
 
 // 函数 card 上的 “更多” 组件
+// TODO: 将 card 提取成单个组件
 const renderCardMore = (
   onClickItem: (type: ECardActionType, fnItem: IFunctionListItem) => () => void,
   fnItem: IFunctionListItem
@@ -218,6 +259,14 @@ export const FunctionSetsCurrying: TComponentCurrying<
 
   const refContainer = useRef(null);
   const containerArea = useSizeArea(refContainer);
+  const [state, dispatch] = useReducer(stateReducer, {
+    modalVisible: false,
+    currentFnItem: {
+      name: '',
+      body: ''
+    },
+    newName: ''
+  });
 
   /* ----------------------------------------------------
     回调函数部分
@@ -260,9 +309,52 @@ export const FunctionSetsCurrying: TComponentCurrying<
   // 点击函数 card 上的更多操作
   const onClickCardAction = useCallback(
     (type: ECardActionType, fnItem: IFunctionListItem) => () => {
-      onCardAction && onCardAction(type, fnItem);
+      // 如果是重命名的操作，需要特殊处理
+      if (type === ECardActionType.RENAME) {
+        dispatch([
+          EReducerType.RENAME,
+          { modalVisible: true, currentFnItem: fnItem, newName: '' }
+        ]);
+      } else {
+        onCardAction && onCardAction(type, fnItem);
+      }
     },
     [onCardAction]
+  );
+
+  const handleNewNameChange = useCallback(
+    (e: React.FocusEvent<HTMLInputElement>) => {
+      dispatch([EReducerType.RENAME, { newName: e.target.value }]);
+    },
+    []
+  );
+
+  const handleRename = useCallback(
+    (fnItem: IFunctionListItem, newName: string, isCancel?: boolean) => () => {
+      if (isCancel) {
+        dispatch([EReducerType.RENAME, { modalVisible: false }]);
+        return;
+      }
+
+      // 进行初步合法性校验
+      // 非空
+      if (!newName) {
+        message.error('函数名不能为空');
+        return;
+      }
+
+      if (!isValidFunctionName(newName)) {
+        message.error(`字符串 ${newName} 不是合法函数名，请修改`);
+        return;
+      }
+
+      // 进行一些最基本的校验
+      dispatch([EReducerType.RENAME, { modalVisible: false }]);
+
+      // 真正调用方法
+      onCardAction && onCardAction(ECardActionType.RENAME, fnItem, newName);
+    },
+    []
   );
 
   // =================================
@@ -336,6 +428,13 @@ export const FunctionSetsCurrying: TComponentCurrying<
           />
         </Col>
         <Col span={8}>
+          <Button
+            type="primary"
+            onClick={onClickBtn(EOperationType.ADD)}
+            icon="plus-square-o"
+          >
+            新增
+          </Button>
           <Popover
             content={sortContent}
             title="点击排序，再点逆序"
@@ -343,9 +442,6 @@ export const FunctionSetsCurrying: TComponentCurrying<
           >
             <Button icon="bars">排序</Button>
           </Popover>
-          <Button onClick={onClickBtn(EOperationType.ADD)} icon="plus-square-o">
-            新增
-          </Button>
           <Button onClick={onClickBtn(EOperationType.VIEWALL)} icon="eye-o">
             查看所有
           </Button>
@@ -369,6 +465,25 @@ export const FunctionSetsCurrying: TComponentCurrying<
         }}
       />
 
+      <Modal
+        title="函数重命名"
+        visible={state.modalVisible}
+        onOk={handleRename(state.currentFnItem, state.newName)}
+        onCancel={handleRename(state.currentFnItem, state.newName, true)}
+      >
+        <Input
+          style={{ marginBottom: '10px' }}
+          addonBefore="原函数名:"
+          value={state.currentFnItem.name}
+          readOnly
+        />
+
+        <Input
+          onChange={handleNewNameChange}
+          addonBefore="新函数名:"
+          placeholder="请输入新函数名"
+        />
+      </Modal>
     </StyledContainer>
   );
 };

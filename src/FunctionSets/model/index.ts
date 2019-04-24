@@ -47,6 +47,15 @@ export function modelExtends(model: IAnyModelType) {
             }
           });
           return result;
+        },
+
+        // 获取函数 id 列表，全量
+        get fnIdFullList() {
+          const result: string[] = [];
+          Array.from(self.fns.values()).map((value: IFuncModel) => {
+            result.push(value.id);
+          });
+          return result;
         }
       };
     })
@@ -70,7 +79,7 @@ export function modelExtends(model: IAnyModelType) {
 
         // 通过 name 检查 fn 是否存在列表中了
         isExistWithName(name: string) {
-          return self.fnIdList.some((id: string) => {
+          return self.fnIdFullList.some((id: string) => {
             return self.fns.get(id).name === name;
           });
         },
@@ -78,7 +87,7 @@ export function modelExtends(model: IAnyModelType) {
         // 通过 name 返回 id
         getIdByName(name: string) {
           let fnId = '';
-          self.fnIdList.some((id: string) => {
+          self.fnIdFullList.some((id: string) => {
             if (self.fns.get(id).name === name) {
               fnId = id;
               return true;
