@@ -2,9 +2,10 @@ import { message } from 'antd';
 import { IStoresEnv, IActionContext } from 'ide-lib-base-component';
 import { IStoresModel } from 'ide-lib-engine';
 
-import { ECardActionType, IFunctionListItem } from '../../index';
+import { IFunctionListItem } from '../../index';
 import { debugInteract } from '../../../lib/debug';
 import { EOperationType } from '../../mods/OperationPanel/index';
+import { ECardActionType } from '../../mods/CardList/index';
 
 /**
  * 处理函数 card 的事件
@@ -45,7 +46,7 @@ export const handleCardAction = (env: IStoresEnv<IStoresModel>) => async (
         return;
       }
 
-    //   最终更新函数名
+      //   最终更新函数名
       stores.model.fns.get(targetId).setName(newName);
       break;
 
