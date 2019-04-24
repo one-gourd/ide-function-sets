@@ -12,7 +12,8 @@ import {
   autoHidePanel,
   hidePanelWhenCancel,
   handleButtonAction,
-  searchFnItem
+  searchFnItem,
+  handleCardAction
 } from './solution';
 import { FuncModel, modelExtends } from './model';
 import { subComponents, ISubProps } from './subs';
@@ -50,7 +51,8 @@ export const configFunctionSets: IModuleConfig<
       onDbFnCard: [showEditPanel],
       onClickPanel: [autoHidePanel],
       onCancelPanel: [hidePanelWhenCancel],
-      onButtonAction: [handleButtonAction]
+      onButtonAction: [handleButtonAction],
+      onCardAction: [handleCardAction]
     },
     defaultProps: DEFAULT_PROPS,
     children: subComponents
@@ -58,14 +60,14 @@ export const configFunctionSets: IModuleConfig<
   router: {
     domain: 'function-sets',
     list: [GetRouter, PostRouter, PutRouter, DelRouter],
-    hoistRoutes: {
-      alias: 'bar',
-      routerNames: 'headerBar'
-    }, // 提升访问子路由功能，相当于是强约束化的 alias
-    aliases: {
-      alias: 'blockbar',
-      path: 'bar/headerbar'
-    } // 自定义的路由别名规则
+    // hoistRoutes: {
+    //   alias: 'bar',
+    //   routerNames: 'headerBar'
+    // }, // 提升访问子路由功能，相当于是强约束化的 alias
+    // aliases: {
+    //   alias: 'blockbar',
+    //   path: 'bar/headerbar'
+    // } // 自定义的路由别名规则
   },
   store: {
     idPrefix: 'sle'
@@ -121,13 +123,12 @@ export const configFunctionSets: IModuleConfig<
 // 当然也可以自己枚举，比如这里的 fnList 就是计算值
 export const SELF_CONTROLLED_KEYS = [
   'visible',
-  'text',
   'fnList',
   'fnName',
   'codeContent',
   'operationType',
   'panelVisible'
-]; // ['visible', 'text']
+];
 
 export const CONTROLLED_KEYS = BASE_CONTROLLED_KEYS.concat(
   SELF_CONTROLLED_KEYS

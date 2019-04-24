@@ -4,3 +4,4 @@ export * from './model/onClickPanel';
 export * from './model/onCancelPanel';
 export * from './model/onButtonAction';
 export * from './model/onSearchChange';
+export * from './model/onCardAction';

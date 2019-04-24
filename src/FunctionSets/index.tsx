@@ -1,5 +1,16 @@
 import React, { useCallback, useRef, useReducer, useEffect } from 'react';
-import { Button, Row, Col, Input, Card, Icon, Popover, message } from 'antd';
+import {
+  Button,
+  Row,
+  Col,
+  Input,
+  Card,
+  Popover,
+  message,
+  Menu,
+  Dropdown,
+  Icon
+} from 'antd';
 import {
   IBaseTheme,
   IBaseComponentProps,
@@ -66,6 +77,11 @@ export interface IFunctionSetsEvent {
    * 函数搜索功能
    */
   onSearchChange?: (e: React.FocusEvent<HTMLInputElement>) => void;
+
+  /**
+   * 函数卡片的操作
+   */
+  onCardAction?: (type: ECardActionType, fnItem: IFunctionListItem) => void;
 }
 
 export interface IFunctionSetsTheme extends IBaseTheme {
@@ -85,11 +101,6 @@ export interface IFunctionSetsProps
    * 是否展现
    */
   visible?: boolean;
-
-  /**
-   * 文案
-   */
-  text?: string;
 
   /**
    * 当前被选中的函数名
@@ -124,15 +135,6 @@ export const DEFAULT_PROPS: IFunctionSetsProps = {
   theme: {
     main: '#ECECEC'
   },
-  headerBar: {
-    buttons: [
-      {
-        id: 'edit',
-        title: '编辑',
-        icon: 'edit'
-      }
-    ]
-  },
   styles: {
     container: {
       height: 800,
@@ -142,14 +144,63 @@ export const DEFAULT_PROPS: IFunctionSetsProps = {
   fnList: []
 };
 
+// 枚举值：函数 card 操作类型
+export enum ECardActionType {
+  RENAME = 'rename', // 重命名
+  DEL = 'del' // 删除函数
+}
+
+// 函数 card 上的 “更多” 组件
+const renderCardMore = (
+  onClickItem: (type: ECardActionType, fnItem: IFunctionListItem) => () => void,
+  fnItem: IFunctionListItem
+) => {
+  const hoverContent = (
+    <Menu>
+      <Menu.Item key="rename">
+        <a
+          onClick={onClickItem(ECardActionType.RENAME, fnItem)}
+          href="javascript:void(0)"
+        >
+          重命名
+        </a>
+      </Menu.Item>
+      {/* <Menu.Item key="1">
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          href="http://www.taobao.com/"
+        >
+          2nd menu item
+        </a>
+      </Menu.Item> */}
+      <Menu.Divider />
+      <Menu.Item key="del">
+        <Button
+          onClick={onClickItem(ECardActionType.DEL, fnItem)}
+          style={{ width: '100%' }}
+          type="danger"
+        >
+          删除
+        </Button>
+      </Menu.Item>
+    </Menu>
+  );
+  return (
+    <Dropdown overlay={hoverContent}>
+      <a className="ant-dropdown-link" href="javascript:void(0);">
+        更多操作 <Icon type="down" />
+      </a>
+    </Dropdown>
+  );
+};
+
 export const FunctionSetsCurrying: TComponentCurrying<
   IFunctionSetsProps,
   ISubProps
 > = subComponents => props => {
   const {
-    headerBar,
     visible,
-    text,
     styles,
     fnList,
     operationType,
@@ -161,13 +212,9 @@ export const FunctionSetsCurrying: TComponentCurrying<
     onClickPanel,
     onCancelPanel,
     onButtonAction,
-    onSearchChange
+    onSearchChange,
+    onCardAction
   } = props;
-
-  const { HeaderBar } = subComponents as Record<
-    string,
-    React.FunctionComponent<typeof props>
-  >;
 
   const refContainer = useRef(null);
   const containerArea = useSizeArea(refContainer);
@@ -175,14 +222,6 @@ export const FunctionSetsCurrying: TComponentCurrying<
   /* ----------------------------------------------------
     回调函数部分
 ----------------------------------------------------- */
-
-  const CbClickPanelOutside = useCallback(
-    (e: MouseEvent, isOutSide: boolean, detail: { [key: string]: boolean }) => {
-      debugInteract('探测是否点在蒙层外:', isOutSide, detail);
-      onClickPanel && onClickPanel(e, isOutSide, detail);
-    },
-    []
-  );
 
   // "新增函数" 按钮回调
   const onClickBtn = useCallback(
@@ -216,6 +255,14 @@ export const FunctionSetsCurrying: TComponentCurrying<
       onDbFnCard && onDbFnCard(fn, fIndex);
     },
     [onDbFnCard]
+  );
+
+  // 点击函数 card 上的更多操作
+  const onClickCardAction = useCallback(
+    (type: ECardActionType, fnItem: IFunctionListItem) => () => {
+      onCardAction && onCardAction(type, fnItem);
+    },
+    [onCardAction]
   );
 
   // =================================
@@ -261,7 +308,7 @@ export const FunctionSetsCurrying: TComponentCurrying<
                 className="hvr-overline-from-center"
                 key={fn.name}
                 title={fn.name}
-                extra={<a href="#">More</a>}
+                extra={renderCardMore(onClickCardAction, fn)}
               >
                 <CodeEditor
                   height={150}
@@ -306,7 +353,7 @@ export const FunctionSetsCurrying: TComponentCurrying<
       </Row>
 
       <OperationPanelWithClickOutside
-        onClick={CbClickPanelOutside}
+        onClick={onClickPanel}
         visible={panelVisible}
         layerArea={containerArea}
         bgColor={'rgba(0,0,0, 0.2)'}
@@ -321,8 +368,7 @@ export const FunctionSetsCurrying: TComponentCurrying<
           onCancel: onCancelPanel
         }}
       />
-      {/* <Button onClick={onClickButton}>{text || '点我试试'}</Button>
-      <HeaderBar {...headerBar} /> */}
+
     </StyledContainer>
   );
 };

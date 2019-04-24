@@ -1,5 +1,15 @@
 import React, { useCallback, useRef, useState, useEffect } from 'react';
-import { Button, message, Row, Col, Input, Icon, Modal, Popover } from 'antd';
+import {
+  Button,
+  message,
+  Row,
+  Col,
+  Input,
+  Icon,
+  Modal,
+  Popover,
+  Tooltip
+} from 'antd';
 import { observer } from 'mobx-react-lite';
 import { CodeEditor } from 'ide-code-editor';
 import { TAnyFunction } from 'ide-lib-base-component';
@@ -126,9 +136,11 @@ const renderFooter = function(
     case EOperationType.DEL:
       return (
         <>
-          <Button type="danger" onClick={onClickSubmit}>
-            删除
-          </Button>
+          <Tooltip placement="top" title="删除操作不可恢复，请谨慎操作">
+            <Button type="danger" onClick={onClickSubmit}>
+              确认删除
+            </Button>
+          </Tooltip>
           <Button onClick={onClickCancel} style={{ marginLeft: 10 }}>
             取消
           </Button>
@@ -196,7 +208,12 @@ export const OperationPanel: React.FunctionComponent<
   const [errContent, setErrContent] = useState('');
 
   const onClickSubmit = useCallback(
-    (type: EOperationType, onSubmit: TAnyFunction, inputName: string, codeBody: string) => () => {
+    (
+      type: EOperationType,
+      onSubmit: TAnyFunction,
+      inputName: string,
+      codeBody: string
+    ) => () => {
       // const fnBody = codeBodyRef.current;
 
       if (!inputName) {
@@ -220,15 +237,15 @@ export const OperationPanel: React.FunctionComponent<
 
       setErrContent(''); // 置空错误信息
 
+      onSubmit && onSubmit(inputName, codeBody, type);
       // 如果是删除操作，进行二次确认
-      if (type === EOperationType.DEL) {
-        showDeleteConfirm(inputName, () => {
-          onSubmit && onSubmit(inputName, codeBody, type);
-          return;
-        });
-      } else {
-        onSubmit && onSubmit(inputName, codeBody, type);
-      }
+      // if (type === EOperationType.DEL) {
+      //   showDeleteConfirm(inputName, () => {
+      //     onSubmit && onSubmit(inputName, codeBody, type);
+      //     return;
+      //   });
+      // } else {
+      // }
     },
     []
   );
@@ -279,7 +296,7 @@ export const OperationPanel: React.FunctionComponent<
                 value={inputName}
               />
             </Col>
-            {type === EOperationType.EDIT &&
+            {/* {type === EOperationType.EDIT &&
               ((
                 <Col span={8} style={{ marginLeft: 14 }}>
                   <Button type="primary" size="small">
@@ -287,7 +304,7 @@ export const OperationPanel: React.FunctionComponent<
                   </Button>
                 </Col>
               ) ||
-                null)}
+                null)} */}
           </Row>
         ) : null}
 

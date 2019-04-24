@@ -9,6 +9,6 @@ export const searchFnItem = (env: IStoresEnv<IStoresModel>) => async (
   e: React.FocusEvent<HTMLInputElement>
 ) => {
   const { stores } = env;
-  console.log(e.target.value);
+//   console.log(e.target.value);
   stores.model.setFilterKey(e.target.value);
 };
