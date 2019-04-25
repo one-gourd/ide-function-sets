@@ -39,7 +39,7 @@ function onClickWithStore(value) {
 
 // 当函数有更改的时候
 function onFnListChange(type, fnItem, fnLists, actionContext) {
-  console.log(`list change, type: ${type}`);
+  console.log(`list change, type: ${type}, fnItem: %o`, fnItem);
 
   const { context } = actionContext;
 
@@ -86,16 +86,11 @@ client
     }
   })
   .then(res => {
-    // 让面板可见
-    // client
-    //   .put('/model', {
-    //     name: 'panelVisible',
-    //     value: true
-    //   })
-    // .then(res => {
-    //   console.log('666', res);
-    //   client.get('/model').then(res => {
-    //     console.log('777', res);
-    //   });
-    // });
+    // 让面板可见, 目前支持 add / edit / type 功能
+    client.put('/fn-panel', {
+      type: 'add',
+      name: 'renderRow2'
+    }).then(res=>{
+      console.log('res: ', res.body.message);
+    });
   });

@@ -2,10 +2,7 @@ import { IStoresEnv, IActionContext } from 'ide-lib-base-component';
 import { IStoresModel } from 'ide-lib-engine';
 
 import { EOperationType } from '../../mods/OperationPanel/index';
-
-const TPL_FN = `function handler(ev){
-
-}`;
+import { TPL_FN } from '../../constants';
 
 /**
  * 不同操作产生不同的效果
