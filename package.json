@@ -1,6 +1,6 @@
 {
   "name": "ide-function-sets",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "function sets for ide",
   "main": "dist/index.umd.js",
   "module": "dist/index.umd.js",
