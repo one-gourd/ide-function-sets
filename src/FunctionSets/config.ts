@@ -105,6 +105,9 @@ export const configFunctionSets: IModuleConfig<
       // 函数面板种类
       operationType: types.optional(types.string, EOperationType.ADD),
 
+      // 用于标记操作面板展示的来源 - 方便区分不同的操作来源
+      flagOperationFrom: types.optional(types.string, ''),
+
       // 函数操作面板是否可见
       panelVisible: types.optional(types.boolean, false)
 

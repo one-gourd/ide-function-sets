@@ -89,8 +89,9 @@ client
     // 让面板可见, 目前支持 add / edit / type 功能
     client
       .put('/fn-panel', {
-        type: 'add',
-        name: 'renderRow2'
+        type: 'edit',
+        name: 'renderRow',
+        from: 'customxxx'
       })
       .then(res => {
         console.log('res: ', res.body.message);

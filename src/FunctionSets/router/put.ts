@@ -7,7 +7,7 @@ import {
 
 import { IContext } from './helper';
 import { EOperationType } from '../mods/OperationPanel';
-import { TPL_FN } from '../constants';
+import { TPL_FN, PANEL_FROM_SELF } from '../constants';
 
 export const router = new Router();
 // 更新单项属性
@@ -30,7 +30,7 @@ router.put('updateModel', '/model', function(ctx: IContext) {
 // 更新函数面板状态
 router.put('updateFn', '/fn-panel', function(ctx: IContext) {
   const { stores, request } = ctx;
-  const { type, name } = request.data;
+  const { type, name, from } = request.data;
 
   let isSuccess = false;
   let message = `unknown type: ${type}`;
@@ -40,6 +40,9 @@ router.put('updateFn', '/fn-panel', function(ctx: IContext) {
   const isExist = !!targetId;
   const operationType = (type && type.toUpperCase()) || '';
   stores.model.setOperationType(operationType);
+
+  // 标记不同的展示来源
+  stores.model.setFlagOperationFrom(from || PANEL_FROM_SELF);
   switch (operationType) {
     // 唤起  “新增” 面板
     case EOperationType.ADD:

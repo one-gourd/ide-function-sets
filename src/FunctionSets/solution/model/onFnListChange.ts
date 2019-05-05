@@ -72,6 +72,7 @@ export const handleFnOperation = (
 
   // 为了方便外部监听提交事件，暴露 change 事件
   app.send('/onSubmitChange', {
+    from: stores.model.flagOperationFrom,
     hasError: context.hasError,
     msg: context.msg,
     type: type,
