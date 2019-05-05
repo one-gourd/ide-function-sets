@@ -87,10 +87,18 @@ client
   })
   .then(res => {
     // 让面板可见, 目前支持 add / edit / type 功能
-    client.put('/fn-panel', {
-      type: 'add',
-      name: 'renderRow2'
-    }).then(res=>{
-      console.log('res: ', res.body.message);
-    });
+    client
+      .put('/fn-panel', {
+        type: 'add',
+        name: 'renderRow2'
+      })
+      .then(res => {
+        console.log('res: ', res.body.message);
+      });
   });
+
+client.subscribe('/onSubmitChange', {
+  onMessage: data => {
+    console.log(777, data);
+  }
+});

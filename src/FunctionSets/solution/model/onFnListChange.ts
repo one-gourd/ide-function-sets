@@ -17,7 +17,7 @@ export const handleFnOperation = (
   fnItem: IFunctionListItem,
   currentFnList: IFunctionListItem[]
 ) => {
-  const { stores, client } = env;
+  const { stores, app } = env;
   const { context } = actionContext;
   // stores.model.setVisible(true); // 可见
   // 获取 id 和 value
@@ -35,12 +35,10 @@ export const handleFnOperation = (
         context.hasError = true;
         context.msg = `名为 ${fnItem.name} 的函数已经存在，请更改函数名`;
         message.error(context.msg);
-        return;
+      } else {
+        //   不存在的情况下才新增
+        stores.model.upsertFnItem(fnItem);
       }
-
-      //   不存在的情况下才新增
-      stores.model.upsertFnItem(fnItem);
-
       break;
 
     case EOperationType.EDIT:
@@ -50,11 +48,11 @@ export const handleFnOperation = (
         context.hasError = true;
         context.msg = `更新失败：名为 ${fnItem.name} 的函数不存在存在`;
         message.error(context.msg);
-        return;
+      } else {
+        //  存在的情况下去更新
+        // console.log(333, fnItem);
+        stores.model.upsertFnItem(fnItem);
       }
-      //  存在的情况下去更新
-      // console.log(333, fnItem);
-      stores.model.upsertFnItem(fnItem);
 
       break;
 
@@ -64,13 +62,22 @@ export const handleFnOperation = (
         context.msg = `删除失败：名为 ${fnItem.name} 的函数不存在存在`;
 
         message.error(context.msg);
-        return;
+      } else {
+        stores.model.removeFnById(targetFnId);
       }
-      stores.model.removeFnById(targetFnId);
       break;
     default:
       break;
   }
+
+  // 为了方便外部监听提交事件，暴露 change 事件
+  app.send('/onSubmitChange', {
+    hasError: context.hasError,
+    msg: context.msg,
+    type: type,
+    fnItem: fnItem,
+    resultList: stores.model.fnList
+  });
 };
 
 /**

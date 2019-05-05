@@ -9,6 +9,7 @@ import { configFunctionSets } from './FunctionSets/config';
 
 const {
   ComponentModel: FunctionSetsModel,
+  StoresModel: FunctionSetsStoresModel,
   NormalComponent: FunctionSets,
   ComponentHOC: FunctionSetsHOC,
   ComponentAddStore: FunctionSetsAddStore,
@@ -17,6 +18,7 @@ const {
 
 export {
   FunctionSetsModel,
+  FunctionSetsStoresModel,
   FunctionSets,
   FunctionSetsHOC,
   FunctionSetsAddStore,
