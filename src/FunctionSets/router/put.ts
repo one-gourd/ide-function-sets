@@ -6,7 +6,7 @@ import {
 } from 'ide-lib-base-component';
 
 import { IContext } from './helper';
-import { EOperationType } from '../mods/OperationPanel';
+import { EOperationType } from '../mods/OperationPanel/index';
 import { TPL_FN, PANEL_FROM_SELF } from '../constants';
 
 export const router = new Router();

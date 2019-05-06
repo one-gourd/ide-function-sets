@@ -1,7 +1,12 @@
 import * as React from 'react';
 import { render } from 'react-dom';
 import { Collapse } from 'antd';
-import { FunctionSets, FunctionSetsFactory, IFunctionSetsProps } from '../src/';
+import {
+  FunctionSets,
+  FunctionSetsFactory,
+  IFunctionSetsProps,
+  FunctionSetsStoresModel
+} from '../src/';
 import { REPL } from '../src/lib/repl';
 import { converterFnJSON } from '../src/FunctionSets/model/func';
 import ReplTests, { eventFns } from './repl.test';
@@ -16,6 +21,8 @@ const fnJSON = repl.extractAllFunction(); // 获取所有的函数对象
 const fnsSnapshoot = converterFnJSON(fnJSON, 'fnBody');
 // console.log(666, fnsSnapshoot);
 const Panel = Collapse.Panel;
+
+console.log('[FunctionSetsStoresModel]: ', FunctionSetsStoresModel);
 
 const {
   ComponentWithStore: FunctionSetsWithStore,
@@ -49,6 +56,7 @@ function onFnListChange(type, fnItem, fnLists, actionContext) {
 
 const props: IFunctionSetsProps = {
   visible: true,
+  cHeight: 300,
   fnList: [
     {
       name: 'ttt',

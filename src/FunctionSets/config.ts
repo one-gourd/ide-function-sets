@@ -4,7 +4,7 @@ import { BASE_CONTROLLED_KEYS } from 'ide-lib-base-component';
 import { IStoresModel, IModuleConfig } from 'ide-lib-engine';
 
 import { DEFAULT_PROPS, IFunctionSetsProps } from '.';
-import { EOperationType } from './mods/OperationPanel';
+import { EOperationType } from './mods/OperationPanel/index';
 import {
   handleFnOperation,
   hidePanelWhenNoError,
@@ -59,7 +59,7 @@ export const configFunctionSets: IModuleConfig<
   },
   router: {
     domain: 'function-sets',
-    list: [GetRouter, PostRouter, PutRouter, DelRouter],
+    list: [GetRouter, PostRouter, PutRouter, DelRouter]
     // hoistRoutes: {
     //   alias: 'bar',
     //   routerNames: 'headerBar'
@@ -70,14 +70,12 @@ export const configFunctionSets: IModuleConfig<
     // } // 自定义的路由别名规则
   },
   store: {
-    idPrefix: 'sle'
+    idPrefix: 'sfs'
   },
   model: {
     controlledKeys: [], // 后续再初始化
     props: {
       visible: types.optional(types.boolean, true),
-      text: types.optional(types.string, ''),
-
       // 排序类型（即按什么排序）
       sortType: types.optional(
         types.enumeration<ESortType>('SortType', Object.values(ESortType)),

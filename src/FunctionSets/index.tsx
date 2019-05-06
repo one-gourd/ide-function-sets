@@ -1,14 +1,5 @@
-import React, {
-  useCallback,
-  useRef
-} from 'react';
-import {
-  Button,
-  Row,
-  Col,
-  Input,
-  Popover,
-} from 'antd';
+import React, { useCallback, useRef } from 'react';
+import { Button, Row, Col, Input, Popover } from 'antd';
 import {
   IBaseTheme,
   IBaseComponentProps,
@@ -135,12 +126,7 @@ export const DEFAULT_PROPS: IFunctionSetsProps = {
   theme: {
     main: '#ECECEC'
   },
-  styles: {
-    container: {
-      height: 800,
-      width: 1060
-    }
-  },
+  cHeight: 400,
   fnList: []
 };
 
@@ -220,14 +206,17 @@ export const FunctionSetsCurrying: TComponentCurrying<
   // console.log(4555, codeContent);
   return (
     <StyledContainer
-      style={styles.container}
+      style={Object.assign(styles.container || {}, {
+        width: props.cWidth,
+        height: props.cHeight
+      })}
       visible={visible}
       ref={refContainer}
       className="ide-function-sets-container"
     >
       <Row className="function-sets-row">
         <CardList
-          height={styles.container.height as number}
+          height={containerArea.size.height}
           fnList={fnList}
           onDbFnCard={onDbFnCard}
           onCardAction={onCardAction}
@@ -269,8 +258,8 @@ export const FunctionSetsCurrying: TComponentCurrying<
         layerArea={containerArea}
         bgColor={'rgba(0,0,0, 0.2)'}
         contentProps={{
-          width: (styles.container.width as number) - 100,
-          height: styles.container.height,
+          width: (containerArea.size.width as number) - 100,
+          height: containerArea.size.height,
           type: operationType,
           visible: panelVisible,
           name: fnName,
