@@ -7,10 +7,10 @@
   "browser": "dist/index.umd.js",
   "typings": "dist/index.d.ts",
   "sideEffects": false,
-  "homepage": "https://alibaba-paimai-frontend.github.io/ide-function-sets.git",
+  "homepage": "https://one-gourd.github.io/ide-function-sets.git",
   "repository": {
     "type": "git",
-    "url": "https://github.com/alibaba-paimai-frontend/ide-function-sets.git"
+    "url": "https://github.com/one-gourd/ide-function-sets.git"
   },
   "scripts": {
     "test": "./node_modules/.bin/jest",
