@@ -104,6 +104,13 @@ client
       .then(res => {
         console.log('res: ', res.body.message);
       });
+
+    // 删除指定函数
+    setTimeout(() => {
+      client.del('/fn-item/__queryBtn_click').then(res => {
+        console.log('删除函数 `__queryBtn_click`:', res);
+      });
+    }, 3000);
   });
 
 client.subscribe('/onSubmitChange', {

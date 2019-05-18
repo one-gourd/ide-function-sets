@@ -187,6 +187,7 @@ export const FunctionSetsCurrying: TComponentCurrying<
   // =================================
 
   // TODO: 添加排序图标 & 交互
+  // TODO: 新增排序功能
   const sortContent = (
     <div>
       <p>
@@ -239,13 +240,13 @@ export const FunctionSetsCurrying: TComponentCurrying<
           >
             新增
           </Button>
-          <Popover
+          {/* <Popover
             content={sortContent}
             title="点击排序，再点逆序"
             trigger="hover"
           >
             <Button icon="bars">排序</Button>
-          </Popover>
+          </Popover> */}
           <Button onClick={onClickBtn(EOperationType.VIEWALL)} icon="eye-o">
             查看所有
           </Button>

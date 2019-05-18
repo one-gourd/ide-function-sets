@@ -11,7 +11,10 @@ import { ECardActionType } from '../../mods/CardList/index';
  * 处理函数 card 的事件
  * @param env - IStoresEnv
  */
-export const handleCardAction = (env: IStoresEnv<IStoresModel>) => async (
+export const handleCardAction = (
+  env: IStoresEnv<IStoresModel>,
+  actionContext: IActionContext
+) => async (
   type: ECardActionType,
   fnItem: IFunctionListItem,
   newName?: string
@@ -22,32 +25,46 @@ export const handleCardAction = (env: IStoresEnv<IStoresModel>) => async (
     fnItem
   );
 
+  const { context } = actionContext;
+
+  //   先查找对象，然后再更新
+  const targetFnId = stores.model.getIdByName(fnItem.name);
+  const isExistId = !!targetFnId;
+
+  context.hasError = false;
+
   switch (type) {
+    // 简化删除操作，直接删除函数
     case ECardActionType.DEL:
-      //   切换到删除
-      stores.model.setOperationType(EOperationType.DEL);
-      stores.model.setFnName(fnItem.name);
-      stores.model.setCodeContent(fnItem.body);
-      stores.model.setPanelVisible(true);
+      // stores.model.setOperationType(EOperationType.DEL);
+      if (!isExistId) {
+        context.hasError = true;
+        context.msg = `删除失败：名为 ${fnItem.name} 的函数不存在存在`;
+
+        message.error(context.msg);
+      } else {
+        stores.model.removeFnById(targetFnId);
+      }
       break;
 
     //  重命名
     case ECardActionType.RENAME:
       // 先查看一下是否重名
       if (stores.model.isExistWithName(newName)) {
-        message.error(`函数名 ${newName} 已存在，请改用其他函数名`);
+        context.msg = `函数名 ${newName} 已存在，请改用其他函数名`;
+        message.error(context.msg);
         return;
       }
 
-      //   先查找对象，然后再更新
-      const targetId = stores.model.getIdByName(fnItem.name);
-      if (!targetId) {
-        message.error(`原函数 ${fnItem.name} 不存在，无法完成修改`);
+      if (!targetFnId) {
+        context.msg = `原函数 ${fnItem.name} 不存在，无法完成修改`;
+
+        message.error(context.msg);
         return;
       }
 
       //   最终更新函数名
-      stores.model.fns.get(targetId).setName(newName);
+      stores.model.fns.get(targetFnId).setName(newName);
       break;
 
     default:

@@ -133,19 +133,19 @@ const renderFooter = function(
   handleVisibleChange: TAnyFunction
 ) {
   switch (type) {
-    case EOperationType.DEL:
-      return (
-        <>
-          <Tooltip placement="top" title="删除操作不可恢复，请谨慎操作">
-            <Button type="danger" onClick={onClickSubmit}>
-              确认删除
-            </Button>
-          </Tooltip>
-          <Button onClick={onClickCancel} style={{ marginLeft: 10 }}>
-            取消
-          </Button>
-        </>
-      );
+    // case EOperationType.DEL:
+    //   return (
+    //     <>
+    //       <Tooltip placement="top" title="删除操作不可恢复，请谨慎操作">
+    //         <Button type="danger" onClick={onClickSubmit}>
+    //           确认删除
+    //         </Button>
+    //       </Tooltip>
+    //       <Button onClick={onClickCancel} style={{ marginLeft: 10 }}>
+    //         取消
+    //       </Button>
+    //     </>
+    //   );
 
     case EOperationType.ADD:
     case EOperationType.EDIT:
@@ -312,8 +312,7 @@ export const OperationPanel: React.FunctionComponent<
           <Col span={24}>
             <CodeEditor
               options={{
-                readOnly:
-                  type === EOperationType.DEL || type === EOperationType.VIEWALL
+                readOnly: type === EOperationType.VIEWALL
               }}
               height={height! - 160}
               width={'100%'}

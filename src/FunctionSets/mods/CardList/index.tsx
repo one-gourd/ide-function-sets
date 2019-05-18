@@ -6,6 +6,7 @@ import {
   message,
   Menu,
   Dropdown,
+  Tooltip,
   Icon,
   Card
 } from 'antd';
@@ -73,13 +74,15 @@ const renderCardMore = (
       </Menu.Item> */}
       <Menu.Divider />
       <Menu.Item key="del">
-        <Button
-          onClick={onClickItem(ECardActionType.DEL, fnItem)}
-          style={{ width: '100%' }}
-          type="danger"
-        >
-          删除
-        </Button>
+        <Tooltip placement="top" title="删除操作不可恢复，请谨慎操作">
+          <Button
+            onClick={onClickItem(ECardActionType.DEL, fnItem)}
+            style={{ width: '100%' }}
+            type="danger"
+          >
+            删除
+          </Button>
+        </Tooltip>
       </Menu.Item>
     </Menu>
   );
