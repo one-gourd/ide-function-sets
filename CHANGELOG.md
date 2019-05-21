@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.1.3](https://github.com/one-gourd/ide-function-sets/compare/v0.1.2...v0.1.3) (2019-05-21)
+
+
+### Features
+
+* 🎸 功能优化: 简化删除函数操作 ([4077c32](https://github.com/one-gourd/ide-function-sets/commit/4077c32))
+* 🎸 功能完善: 使用 cWidth 基础属性 ([58f5aca](https://github.com/one-gourd/ide-function-sets/commit/58f5aca))
+* 🎸 功能新增: flagOperationFrom 标志 ([717b013](https://github.com/one-gourd/ide-function-sets/commit/717b013))
+
+
+
 ## [0.1.2](https://github.com/alibaba-paimai-frontend/ide-function-sets/compare/v0.1.1...v0.1.2) (2019-05-05)
 
 
