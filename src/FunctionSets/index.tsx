@@ -14,6 +14,8 @@ import { ISubProps } from './subs';
 import { OperationPanel, EOperationType } from './mods/OperationPanel';
 import { CardList, ECardActionType } from './mods/CardList';
 
+export * from './model/func';
+
 const Search = Input.Search;
 
 const OperationPanelWithClickOutside = withClickOutside(OperationPanel);
