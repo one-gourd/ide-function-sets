@@ -23,6 +23,7 @@ module.exports = common.map(config => {
     plugins: [
       new HtmlWebpackPlugin({
         title: 'ide-function-sets',
+        chunkFilename: '[name].bundle.js',
         excludeChunks: ['index', 'index.js'],
         // Load a custom template (lodash by default)
         template: 'demo/index.html'

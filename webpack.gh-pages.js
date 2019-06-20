@@ -16,7 +16,7 @@ module.exports = common.map(config => {
   /* 这份配置是用于发布 demo 到 gh-pages 分支使用的  */
   return merge(config, {
     entry: './demo/demo.tsx',
-    externals: getExternal(["ide-code-editor"], true),
+    externals: getExternal(['ide-code-editor'], true),
     mode: 'production',
     devtool: 'source-map',
     optimization: {
@@ -37,6 +37,7 @@ module.exports = common.map(config => {
     ],
     output: {
       filename: 'demo.js',
+      chunkFilename: '[name].bundle.js',
       path: path.resolve(__dirname, targetDir),
       libraryTarget: 'umd',
       library: 'ideFunctionSetsDemo',

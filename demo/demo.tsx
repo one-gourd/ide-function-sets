@@ -95,15 +95,15 @@ client
   })
   .then(res => {
     // 让面板可见, 目前支持 add / edit / type 功能
-    client
-      .put('/fn-panel', {
-        type: 'edit',
-        name: 'renderRow',
-        from: 'customxxx'
-      })
-      .then(res => {
-        console.log('res: ', res.body.message);
-      });
+    // client
+    //   .put('/fn-panel', {
+    //     type: 'edit',
+    //     name: 'renderRow',
+    //     from: 'customxxx'
+    //   })
+    //   .then(res => {
+    //     console.log('res: ', res.body.message);
+    //   });
 
     // 删除指定函数
     setTimeout(() => {

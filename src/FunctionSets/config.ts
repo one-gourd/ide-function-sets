@@ -18,6 +18,8 @@ import {
 import { FuncModel, modelExtends } from './model';
 import { subComponents, ISubProps } from './subs';
 
+import { ESortType, ESortOrder } from './mods/SortPanel';
+
 import { router as GetRouter } from './router/get';
 import { router as PostRouter } from './router/post';
 import { router as PutRouter } from './router/put';
@@ -25,19 +27,19 @@ import { router as DelRouter } from './router/del';
 
 // TODO: 支持自定义排序
 
-export enum ESortType {
-  REFNUM = 'REFNUM', // 引用次数
-  NAME = 'NAME', // 函数名
-  MODIFYTIME = 'MODIFYTIME', // 修改时间
-  LINENUM = 'LINENUM', // 代码行数
-  NULL = 'NULL' // 默认排序
-}
+// export enum ESortType {
+//   REFNUM = 'REFNUM', // 引用次数
+//   NAME = 'NAME', // 函数名
+//   MODIFYTIME = 'MODIFYTIME', // 修改时间
+//   LINENUM = 'LINENUM', // 代码行数
+//   NULL = 'NULL' // 默认排序
+// }
 
-export enum ESortOrder {
-  NULL = 'NULL', // 默认顺序
-  ASC = 'ASC', // 升序
-  DESC = 'DESC' // 降序
-}
+// export enum ESortOrder {
+//   NULL = 'NULL', // 默认顺序
+//   ASC = 'ASC', // 升序
+//   DESC = 'DESC' // 降序
+// }
 
 export const configFunctionSets: IModuleConfig<
   IFunctionSetsProps,

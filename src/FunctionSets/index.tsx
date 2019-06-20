@@ -13,6 +13,7 @@ import { ISubProps } from './subs';
 
 import { OperationPanel, EOperationType } from './mods/OperationPanel';
 import { CardList, ECardActionType } from './mods/CardList';
+import { SortPanel, IReducerState } from './mods/SortPanel';
 
 export * from './model/func';
 
@@ -186,27 +187,13 @@ export const FunctionSetsCurrying: TComponentCurrying<
     [onFnListChange]
   );
 
+  // 点击排序面板的时候
+  const onSortList = useCallback((state: IReducerState) => {
+    console.log(111, state);
+  }, []);
+
   // =================================
 
-  // TODO: 添加排序图标 & 交互
-  // TODO: 新增排序功能
-  const sortContent = (
-    <div>
-      <p>
-        <a>引用次数</a>
-      </p>
-      <p>
-        <a>ID 字母</a>
-      </p>
-      <p>
-        <a>修改时间</a>
-      </p>
-      <p>
-        <a>代码行数</a>
-      </p>
-    </div>
-  );
-  // console.log(4555, codeContent);
   return (
     <StyledContainer
       style={Object.assign(styles.container || {}, {
@@ -242,13 +229,13 @@ export const FunctionSetsCurrying: TComponentCurrying<
           >
             新增
           </Button>
-          {/* <Popover
-            content={sortContent}
+          <Popover
+            content={<SortPanel onSort={onSortList} />}
             title="点击排序，再点逆序"
             trigger="hover"
           >
             <Button icon="bars">排序</Button>
-          </Popover> */}
+          </Popover>
           <Button onClick={onClickBtn(EOperationType.VIEWALL)} icon="eye-o">
             查看所有
           </Button>
