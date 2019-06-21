@@ -1,13 +1,46 @@
 import { types, cast, IAnyModelType, destroy } from 'mobx-state-tree';
 
 import { invariant, pick } from 'ide-lib-utils';
+import { TAnyFunction } from 'ide-lib-base-component';
 
 import { IFuncModelSnapshot, IFuncModel, converterFnSnapshot } from './func';
 import { IFunctionListItem } from '../index';
 import { debugModel } from '../../lib/debug';
 import { escapeRegex } from '../../lib/util';
 
+import { ESortBy, ESortOrder } from '../mods/SortPanel/';
+
 export * from './func';
+
+const sort_by = function(
+  field?: string,
+  reverse = false,
+  primer: TAnyFunction = null
+) {
+  const key: (x: any) => any = x => {
+    const target = field ? x[field] : x;
+    return primer ? primer(target) : target;
+  };
+
+  const reverseBy = !reverse ? 1 : -1;
+
+  return function(a: any, b: any) {
+    const aa = key(a);
+    const bb = key(b);
+    // @ts-ignore
+    return reverseBy * ((aa > bb) - (bb > aa));
+  };
+};
+
+function getSortFunction(by: ESortBy, order: ESortOrder) {
+  switch (by) {
+    case ESortBy.NAME:
+      return sort_by('name', order === ESortOrder.DESC);
+
+    default:
+      break;
+  }
+}
 
 export function modelExtends(model: IAnyModelType) {
   return model
@@ -71,10 +104,24 @@ export function modelExtends(model: IAnyModelType) {
 
         // 生成函数对象 list: [{name: 'hello', body: 'world'}]
         // 用于展示页面列表，支持 filterKey 进行列表过滤
+        // 支持自定义排序
         get fnList(): IFunctionListItem[] {
-          return self.fnIdList.map((id: string) => {
+          let result = self.fnIdList.map((id: string) => {
             return pick(self.fns.get(id), ['name', 'body']);
           });
+
+          // 如果有排序参数，则进行排序
+          if (
+            self.sortBy !== ESortBy.NULL &&
+            self.sortOrder !== ESortOrder.NULL
+          ) {
+            const sortFn = getSortFunction(self.sortBy, self.sortOrder);
+
+            if (sortFn) {
+              result.sort(sortFn); // 排序会影响 result 数组
+            }
+          }
+          return result;
         },
 
         // 通过 name 检查 fn 是否存在列表中了

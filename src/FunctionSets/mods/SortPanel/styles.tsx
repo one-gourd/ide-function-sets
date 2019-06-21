@@ -1,4 +1,3 @@
-import { Icon } from 'antd';
 import styled from 'styled-components';
 // import { desaturate } from 'polished';
 import { IBaseStyledProps } from 'ide-lib-base-component';

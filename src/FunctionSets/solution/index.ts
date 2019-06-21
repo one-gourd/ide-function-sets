@@ -5,3 +5,4 @@ export * from './model/onCancelPanel';
 export * from './model/onButtonAction';
 export * from './model/onSearchChange';
 export * from './model/onCardAction';
+export * from './model/onSortList';

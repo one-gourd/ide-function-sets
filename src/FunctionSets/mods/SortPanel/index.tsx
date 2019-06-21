@@ -5,7 +5,7 @@ import { observer } from 'mobx-react-lite';
 import { StyledSortPanelWrap, StyledSortItemWrap } from './styles';
 import { debugMini } from '../../../lib/debug';
 
-export enum ESortType {
+export enum ESortBy {
   REFNUM = 'REFNUM', // 引用次数
   NAME = 'NAME', // 函数名
   MODIFYTIME = 'MODIFYTIME', // 修改时间
@@ -23,7 +23,7 @@ export interface ISortPanelProps {
   /**
    * 排序类型（排序一句）
    */
-  sortBy?: ESortType;
+  sortBy?: ESortBy;
 
   /**
    * 排序顺序
@@ -37,7 +37,7 @@ export interface ISortPanelProps {
 }
 
 export interface IReducerState {
-  by: ESortType;
+  by: ESortBy;
   order: ESortOrder;
 }
 
@@ -118,7 +118,7 @@ const getNextOrder = function(currentOrder: ESortOrder) {
 export const SortPanel: React.FunctionComponent<ISortPanelProps> = observer(
   props => {
     const {
-      sortBy = ESortType.NULL,
+      sortBy = ESortBy.NULL,
       sortOrder = ESortOrder.NULL,
       onSort
     } = props;
@@ -129,7 +129,7 @@ export const SortPanel: React.FunctionComponent<ISortPanelProps> = observer(
     });
 
     const onClickItem = useCallback(
-      (by: ESortType) => () => {
+      (by: ESortBy) => () => {
         if (state.by !== by) {
           dispatch([EReducerType.SORTBY, { by }]);
           onSort && onSort({ by: by, order: ESortOrder.ASC });
@@ -146,18 +146,18 @@ export const SortPanel: React.FunctionComponent<ISortPanelProps> = observer(
       <StyledSortPanelWrap className="sort-panel-wrap">
         <SortItem
           name="引用次数"
-          order={state.by === ESortType.REFNUM ? state.order : ESortOrder.NULL}
-          onClick={onClickItem(ESortType.REFNUM)}
+          order={state.by === ESortBy.REFNUM ? state.order : ESortOrder.NULL}
+          onClick={onClickItem(ESortBy.REFNUM)}
         />
         <SortItem
           name="ID名"
-          order={state.by === ESortType.NAME ? state.order : ESortOrder.NULL}
-          onClick={onClickItem(ESortType.NAME)}
+          order={state.by === ESortBy.NAME ? state.order : ESortOrder.NULL}
+          onClick={onClickItem(ESortBy.NAME)}
         />
         <SortItem
           name="代码行数"
-          order={state.by === ESortType.LINENUM ? state.order : ESortOrder.NULL}
-          onClick={onClickItem(ESortType.LINENUM)}
+          order={state.by === ESortBy.LINENUM ? state.order : ESortOrder.NULL}
+          onClick={onClickItem(ESortBy.LINENUM)}
         />
       </StyledSortPanelWrap>
     );

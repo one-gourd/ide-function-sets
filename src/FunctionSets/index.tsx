@@ -13,7 +13,12 @@ import { ISubProps } from './subs';
 
 import { OperationPanel, EOperationType } from './mods/OperationPanel';
 import { CardList, ECardActionType } from './mods/CardList';
-import { SortPanel, IReducerState } from './mods/SortPanel';
+import {
+  SortPanel,
+  IReducerState,
+  ESortOrder,
+  ESortBy
+} from './mods/SortPanel/index';
 
 export * from './model/func';
 
@@ -76,6 +81,11 @@ export interface IFunctionSetsEvent {
     fnItem: IFunctionListItem,
     newName?: string
   ) => void;
+
+  /**
+   * 当排序更新的时候
+   */
+  onSortList?: (state: IReducerState) => void;
 }
 
 export interface IFunctionSetsTheme extends IBaseTheme {
@@ -100,6 +110,16 @@ export interface IFunctionSetsProps
    * 当前被选中的函数名
    */
   fnName?: string;
+
+  /**
+   * 排序类型（排序）
+   */
+  sortBy?: ESortBy;
+
+  /**
+   * 排序顺序
+   */
+  sortOrder?: ESortOrder;
 
   /**
    * 展现在面板里的函数内容
@@ -141,6 +161,8 @@ export const FunctionSetsCurrying: TComponentCurrying<
     visible,
     styles,
     fnList,
+    sortBy,
+    sortOrder,
     operationType,
     fnName,
     codeContent,
@@ -151,6 +173,7 @@ export const FunctionSetsCurrying: TComponentCurrying<
     onCancelPanel,
     onButtonAction,
     onSearchChange,
+    onSortList,
     onCardAction
   } = props;
 
@@ -186,11 +209,6 @@ export const FunctionSetsCurrying: TComponentCurrying<
     },
     [onFnListChange]
   );
-
-  // 点击排序面板的时候
-  const onSortList = useCallback((state: IReducerState) => {
-    console.log(111, state);
-  }, []);
 
   // =================================
 
@@ -230,7 +248,13 @@ export const FunctionSetsCurrying: TComponentCurrying<
             新增
           </Button>
           <Popover
-            content={<SortPanel onSort={onSortList} />}
+            content={
+              <SortPanel
+                onSort={onSortList}
+                sortBy={sortBy}
+                sortOrder={sortOrder}
+              />
+            }
             title="点击排序，再点逆序"
             trigger="hover"
           >

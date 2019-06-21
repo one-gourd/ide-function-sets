@@ -37,7 +37,7 @@ export const eventFns = `;(function() {
         $store[id].value = value;
       };
     
-      window['renderColumnStatus'] = (value, index, record) => {
+      window['arenderColumnStatus'] = (value, index, record) => {
         const moods = {
           '1': 'Excited',
           '2': 'Happy',
@@ -124,7 +124,7 @@ export default {
       '__pagination_change',
       '__userNameChange',
       '__statusFilterChange',
-      'renderColumnStatus',
+      'arenderColumnStatus',
       'renderRow'
     ]);
   },

@@ -13,33 +13,18 @@ import {
   hidePanelWhenCancel,
   handleButtonAction,
   searchFnItem,
+  sortFnItem,
   handleCardAction
 } from './solution';
 import { FuncModel, modelExtends } from './model';
 import { subComponents, ISubProps } from './subs';
 
-import { ESortType, ESortOrder } from './mods/SortPanel';
+import { ESortBy, ESortOrder } from './mods/SortPanel/index';
 
 import { router as GetRouter } from './router/get';
 import { router as PostRouter } from './router/post';
 import { router as PutRouter } from './router/put';
 import { router as DelRouter } from './router/del';
-
-// TODO: 支持自定义排序
-
-// export enum ESortType {
-//   REFNUM = 'REFNUM', // 引用次数
-//   NAME = 'NAME', // 函数名
-//   MODIFYTIME = 'MODIFYTIME', // 修改时间
-//   LINENUM = 'LINENUM', // 代码行数
-//   NULL = 'NULL' // 默认排序
-// }
-
-// export enum ESortOrder {
-//   NULL = 'NULL', // 默认顺序
-//   ASC = 'ASC', // 升序
-//   DESC = 'DESC' // 降序
-// }
 
 export const configFunctionSets: IModuleConfig<
   IFunctionSetsProps,
@@ -54,7 +39,8 @@ export const configFunctionSets: IModuleConfig<
       onClickPanel: [autoHidePanel],
       onCancelPanel: [hidePanelWhenCancel],
       onButtonAction: [handleButtonAction],
-      onCardAction: [handleCardAction]
+      onCardAction: [handleCardAction],
+      onSortList: [sortFnItem]
     },
     defaultProps: DEFAULT_PROPS,
     children: subComponents
@@ -79,9 +65,9 @@ export const configFunctionSets: IModuleConfig<
     props: {
       visible: types.optional(types.boolean, true),
       // 排序类型（即按什么排序）
-      sortType: types.optional(
-        types.enumeration<ESortType>('SortType', Object.values(ESortType)),
-        ESortType.NULL
+      sortBy: types.optional(
+        types.enumeration<ESortBy>('sortBy', Object.values(ESortBy)),
+        ESortBy.NULL
       ),
 
       // 排序的顺序，升级还是降序
@@ -126,6 +112,8 @@ export const configFunctionSets: IModuleConfig<
 // 当然也可以自己枚举，比如这里的 fnList 就是计算值
 export const SELF_CONTROLLED_KEYS = [
   'visible',
+  'sortBy',
+  'sortOrder',
   'fnList',
   'fnName',
   'codeContent',
