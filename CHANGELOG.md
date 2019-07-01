@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.1.5](https://github.com/one-gourd/ide-function-sets/compare/v0.1.4...v0.1.5) (2019-07-01)
+
+
+### Features
+
+* 🎸 排序功能 ([733c90b](https://github.com/one-gourd/ide-function-sets/commit/733c90b))
+* 🎸 排序功能: 双向绑定 ([8872b28](https://github.com/one-gourd/ide-function-sets/commit/8872b28))
+
+
+
 ## [0.1.4](https://github.com/one-gourd/ide-function-sets/compare/v0.1.3...v0.1.4) (2019-05-28)
 
 
