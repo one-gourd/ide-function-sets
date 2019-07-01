@@ -145,14 +145,14 @@ export const SortPanel: React.FunctionComponent<ISortPanelProps> = observer(
     return (
       <StyledSortPanelWrap className="sort-panel-wrap">
         <SortItem
+          name="函数名"
+          order={state.by === ESortBy.NAME ? state.order : ESortOrder.NULL}
+          onClick={onClickItem(ESortBy.NAME)}
+        />
+        <SortItem
           name="引用次数"
           order={state.by === ESortBy.REFNUM ? state.order : ESortOrder.NULL}
           onClick={onClickItem(ESortBy.REFNUM)}
-        />
-        <SortItem
-          name="ID名"
-          order={state.by === ESortBy.NAME ? state.order : ESortOrder.NULL}
-          onClick={onClickItem(ESortBy.NAME)}
         />
         <SortItem
           name="代码行数"
